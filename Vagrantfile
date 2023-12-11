@@ -90,6 +90,10 @@ Vagrant.configure("2") do |config|
         :libvirt__network_name => "ELAN#{i}",
         :libvirt__always_destroy => false,
         :ip => "172.24.26.1"
+      node.vm.synced_folder "znetboot_elan#{i}", "/mnt/znetboot"
+      node.vm.provision :shell, inline: <<-SHELL
+        ip route replace default via 192.168.124.1
+      SHELL
       if i == N
         node.vm.provision :ansible do |ansible|
           ansible.playbook = "ansible/build-an-elan.yml"
@@ -99,5 +103,4 @@ Vagrant.configure("2") do |config|
       end  
     end
   end
-
 end

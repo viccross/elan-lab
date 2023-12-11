@@ -40,6 +40,11 @@
     insertafter: "\\[main\\].*"
     regexp: "^dns=.*"
 
+- name: Restart NetworkManager to have DNS change take effect
+  systemd:
+    name: NetworkManager
+    state: restarted
+
 - name: Use local dns in resolv.conf
   blockinfile:
     dest: /etc/resolv.conf

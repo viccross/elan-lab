@@ -1,0 +1,102 @@
+#!/bin/bash
+
+# vmcp
+# This script simulates the output of the real vmcp
+# program for testing without access to z/VM.
+
+usage() {
+echo "vmcp: z/VM CP command interface."
+echo "Usage:"
+echo "vmcp [-k] [-b <size>] command"
+echo "vmcp [-h|-v]"
+echo ""
+echo "Options:"
+echo "-h or --help     :Print usage information, then exit"
+echo "-v or --version  :Print version information, then exit"
+echo "-k or --keepcase :Using this option, vmcp does not convert the command"
+echo "                  to uppercase. The default is to translate the command"
+echo "                  string."
+echo "-b <size> or     :defines the buffer size for the response"
+echo "--buffer=<size>   valid values are from 4096 to 1048576 bytes"
+echo "                  the k and M suffixes are also supported"
+}
+
+CMD=${1^^}
+OPT=${2^^}
+P1=${3^^}
+case $CMD in
+  "Q" | "QUERY" )
+    case $OPT in
+      "USERID" )
+        hn=$(hostname -s)
+        echo "LXOCPB01 AT ZVMESI${hn:0-1}"
+      ;;
+      "N" | "NAMES" )
+        echo "VSMREQIN - DSC , VSMGUARD - DSC , TCPIP    - DSC , FTPSERVE - DSC"
+        echo "VSMEVSRV - DSC , VSMREQIN - DSC , VSMREQI6 - DSC , VSMREQIU - DSC"
+        echo "LOHCOST  - DSC , PERSMAPI - DSC , PERFSVM  - DSC , LXOCPB01 - DSC"
+	echo "DTCVSW1  - DSC , VSMWORK1 - DSC , DTCVSW2  - DSC , VSMWORK2 - DSC"
+	echo "DTCVSW3  - DSC , VSMWORK3 - DSC , DTCVSW4  - DSC , DTCSMAPI - DSC"
+	echo "RACFVM   - DSC , VMSERVS  - DSC , VMSERVR  - DSC , VMSERVP  - DSC"
+	echo "VMSERVU  - DSC , DIRMAINT - DSC , DATAMOVE - DSC , OPERSYMP - DSC"
+	echo "OPERATOR - SYSC, MAINT    -L0003"
+        echo "VSM     - TCPIP"
+      ;;
+      "DA" | "DASD" )
+        echo "DASD  1000 CP OWNED  ZVMCM1   41"
+        echo "DASD  1001 CP OWNED  ZVMRES   278"
+        echo "DASD  1002 CP OWNED  ZVMS01   1"
+	echo "DASD  1003 CP OWNED  ZVMP01   0"
+	echo "DASD  1004 CP OWNED  ZVMS02   1"
+	echo "DASD  1005 CP OWNED  ZVMP02   0"
+	echo "DASD  1010 CP SYSTEM ZVMU01   2"
+	echo "DASD  1011 CP SYSTEM ZVMU02   1"
+	echo "DASD  1020 CP SYSTEM ZVMC01   0"
+	echo "DASD  1021 CP SYSTEM ZVMC02   0"
+	echo "DASD  1022 CP SYSTEM ZVMC03   0"
+	echo "DASD  1023 CP SYSTEM ZVMC04   0"
+	echo "DASD  1024 CP SYSTEM ZVMC05   0"
+	echo "DASD  1025 CP SYSTEM ZVMC06   0"
+      ;;
+      "STOR" | "STORAGE" | "STORE" )
+        echo "STORAGE = 1536G CONFIGURED = 1024G INC = 1G STANDBY = 512G RESERVED = 0"
+	echo "Permanent = 1024G Reconfigurable = 512G Maximum STORAGE = 2048G"
+      ;;
+      "VAR" | "VARIABLE" )
+        case $P1 in
+          "ZVMESI.INSTALLATION" )
+            echo "7304v ECKD-Vic-Dev"
+	  ;;
+          "ZVMESI.SYSGROUP" )
+            cat /mnt/znetboot/var.esi.sysgroup
+	  ;;
+          "" )
+            echo "SYSTEM ZVMESI.SYSGROUP $(cat /mnt/znetboot/var.esi.sysgroup)"
+            echo "SYSTEM ZVMESI.INSTALLATION 7304v ECKD-Vic-Dev"
+	  ;;
+          * )
+            echo ""
+	  ;;
+	esac
+      ;;
+      * )
+        echo "HCPCQV003E Invalid option - $OPT"
+        echo "Error: non-zero CP response for command '$CMD $OPT': #3"
+        exit 1
+      ;;
+    esac
+  ;;
+  "IND" | "INDICATE" )
+    echo "AVGPROC-005% 0006"
+    echo "MDC READS-000013/SEC WRITES-000001/SEC HIT RATIO-100%"
+    echo "PAGING-0/SEC"
+    echo "Q0-00001 Q1-00005           Q2-00004 EXPAN-002 Q3-00019 EXPAN-002"
+  ;;
+  "" )
+    usage
+  ;;
+  * )
+    echo "Error: non-zero CP response for command '$CMD': #1"
+  ;;
+esac
+

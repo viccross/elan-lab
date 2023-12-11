@@ -1,4 +1,12 @@
 ---
+- name: Copy the vmcp script
+  copy:
+    src: vmcp
+    dest: /usr/local/bin/vmcp
+    owner: root
+    group: root
+    mode: 0755
+
 - name: Install EPEL repository
   block:
   - name: Install EPEL RPM
@@ -27,6 +35,7 @@
 - name: Install base prerequisites
   yum:
     name:
+      - ansible
       - unzip
       - python3-libsemanage
       - incron

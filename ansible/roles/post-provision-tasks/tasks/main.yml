@@ -1,0 +1,7 @@
+---
+- name: Start the zvm-ipconf service
+  systemd:
+    name: zvm-ipconf
+    state: started
+    enabled: no
+

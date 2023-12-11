@@ -1,11 +1,11 @@
 ---
-- name: Install Ansible, incron, and nfs-utils
+- name: Install some dependencies
   yum:
     name:
-      - ansible-core
-      - ansible-collection-community-general
-      - ansible-collection-ansible-utils
-      - ansible-collection-ansible-posix
+      #      - ansible
+      #      - ansible-collection-community-general
+      #      - ansible-collection-ansible-utils
+      #      - ansible-collection-ansible-posix
       - python36
       - python3-magic
       - finna
@@ -61,6 +61,7 @@
   include_tasks: download-clients.yml
   loop:
     - "stable-4.8"
+  when: ansible_architecture == "s390x"
 
 - name: Create openshift workdir
   file:

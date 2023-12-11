@@ -87,7 +87,7 @@
     mode: 0644
   loop:
   - { servicename: "smapi", cmdpath: "/usr/local/sbin/checksmapi.sh", requires: "" }
-  - { servicename: "zvm-ipconf", cmdpath: "/usr/local/sbin/ipconf.sh", requires: "smapi.service" }
+  - { servicename: "zvm-ipconf", cmdpath: "/usr/local/sbin/ipconf.sh", requires: "" }
 
 - name: Ensure old systemd service files don't exist
   file:

@@ -40,8 +40,8 @@ cluster_name: "ocp-z-poc"
 cert_organization: IBM
 cert_country: AU
 dns_nameserver: 192.168.86.10
-bastion_vsw_dev: "ad0"
-bastion_hsi_dev: "ad8"
+bastion_vsw_dev: "eth1"
+bastion_hsi_dev: "eth2"
 guest_internal_nicid: "encad8"
 guest_internal_znet: "qeth,0.0.0ad8,0.0.0ad9,0.0.0ada,layer2=0,portname={{ ocp_cluster_lan_name }},portno=0"
 subnet_gateway: 172.24.26.1

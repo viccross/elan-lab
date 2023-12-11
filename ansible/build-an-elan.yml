@@ -26,3 +26,5 @@
   - configure-ignition
   - setup-ocp-deployer
   - setup-icic-deployer
+  - post-provision-tasks
+

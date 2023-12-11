@@ -1,9 +1,9 @@
 #!/bin/bash
-# ipconf.sh -- IP configuration in FastVM
+# ipconf.sh -- IP configuration in the testing rig for z/VM ESI
 # Checks for a configuration file on the CMS disk and configures appropriately
 
 FP={{ znetboot_cfg_path }}
-IFN=enc{{ bastion_vsw_dev }}
+IFN={{ bastion_vsw_dev }}
 MYID=`vmcp q userid | awk '{print $1;}'`
 ESIGROUP=`vmcp q variable zvmesi.sysgroup`
 
@@ -17,18 +17,28 @@ function changeIP {
   PFX=`ipcalc -p ${IPADDR} ${NETMASK} | sed -n 's/^PREFIX=\(.*\)/\1/p'`
   echo ", prefix is ${PFX}"
 
+# Change for Testing:
+# In the testing case, the IP address is already set and I'm not sure if changing
+# it outside Vagrant is going to break things (but I strongly expect it would).
+# So no changing IP address -- but we definitely need to do the rest of the things.
+# (In fact I think I might change it so that if the address is *different* then we
+# bail, because that would indicate that we are looking at the wrong config direct-
+# ory or some other similar configuration error.)
   # check if the address is the same as existing
   # **** This check may be removed if we decide change is mandatory
   FILEIP="${IPADDR}/$PFX"
   SYSIP=$(ip -br addr show dev ${IFN} | awk '{print $3}')
-  if [ "${FILEIP}" = "${SYSIP}" ]; then
-    echo "IP address is already the same, exiting"
+  if [ "${FILEIP}" != "${SYSIP}" ]; then
+    echo "IP address is NOT the same, exiting"
     exit 0;
   fi
 
   # go ahead with the address change
-  echo "Address change is required"
+  echo "Network change is required"
   # pull the rest of the variables
+# Change for Testing:
+# We are not changing IP config details, only things like domain name.
+# So don't alter things like GATEWAY
   source <(grep ^GATEWAY ${FN})
   echo "Gateway is ${GATEWAY}"
   source <(grep ^HOSTNM ${FN})
@@ -72,17 +82,20 @@ function changeIP {
     CLUSTER_NAME="ocp-z-poc"
   fi
 
-  # all the details retrieved, let's use nmcli to do the address work
-  # first, obtain the UUID of the interface
-  source <(grep ^UUID /etc/sysconfig/network-scripts/ifcfg-${IFN})
-  if [ ! -v UUID ]; then
-    echo "UUID of interface not known, exiting!"
-    exit 1;
-  fi
-  # next, update the interface
-  nmcli con mod ${UUID} ipv4.method manual ipv4.addresses "${IPADDR}/${PFX}"
-  nmcli con mod ${UUID} ipv4.gateway "${GATEWAY}"
-  nmcli con up ${UUID}
+# Change for Testing:
+# Do NOT do the actual IP address change!
+# Commenting out the following block.
+#  # all the details retrieved, let's use nmcli to do the address work
+#  # first, obtain the UUID of the interface
+#  source <(grep ^UUID /etc/sysconfig/network-scripts/ifcfg-${IFN})
+#  if [ ! -v UUID ]; then
+#    echo "UUID of interface not known, exiting!"
+#    exit 1;
+#  fi
+#  # next, update the interface
+#  nmcli con mod ${UUID} ipv4.method manual ipv4.addresses "${IPADDR}/${PFX}"
+#  nmcli con mod ${UUID} ipv4.gateway "${GATEWAY}"
+#  nmcli con up ${UUID}
 
   # Update the system hostname
   FULLDOMAIN="${CLUSTER_NAME}.${DOMAIN}"
@@ -115,7 +128,7 @@ EOF
   pushd /opt/ansible && ansible-playbook -i inventory regen-certificates.yml && popd
 
   # update Apache configuration
-  sed -i.bak -e "s/wsc.ibm/${DOMAIN}/g" -e "s/ocp-z-poc/${CLUSTER_NAME}/g" \
+  sed -i.bak -e "s/veejoe.net/${DOMAIN}/g" -e "s/ocp-z-poc/${CLUSTER_NAME}/g" \
     /etc/httpd/conf/httpd.conf /etc/httpd/conf.d/ssl.conf /etc/httpd/conf.d/nonssl.conf /var/www/html/ocp-console.html
   # Hostname might have been updated, make those changes before restarting things
   if [ -z "${HOSTSET}" ]; then
