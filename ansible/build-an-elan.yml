@@ -26,5 +26,10 @@
   - configure-ignition
   - setup-ocp-deployer
   - setup-icic-deployer
+
+- name: Let handlers run from the previous play
+  hosts: dev_elan_hosts
+  become: true
+  roles:
   - post-provision-tasks
 
