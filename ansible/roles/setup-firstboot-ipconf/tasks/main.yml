@@ -1,0 +1,123 @@
+---
+- name: Ensure all required directories exist on the host
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0755
+  loop:
+    - "/mnt/znetboot"
+    - "/opt/ansible/tasks"
+    - "/opt/ansible/inventory/group_vars"
+    - "/opt/ansible/templates/named"
+    - "/opt/ansible/templates/haproxy"
+    - "/usr/local/lib/systemd/system"
+    - "/etc/zvmesi"
+  register: ret
+  failed_when:
+    - 'ret.rc is defined'
+    - '"Read-only file system" not in ret.module_stdout'
+
+      #- name: Install required Ansible collections
+      #  community.general.ansible_galaxy_install:
+      #    type: collection
+      #    name: community.crypto
+
+- name: Add the cmsfs-fuse-a script
+  copy:
+    dest: /usr/local/bin/cmsfs-fuse-a
+    owner: root
+    mode: 0755
+    content: |
+      #!/bin/sh
+      cmsfs-fuse -a $@
+  when: ansible_architecture == "s390x"
+
+- name: Add the fstab entry for LNXMAINT.200
+  mount:
+    state: present
+    src: /dev/disk/by-path/ccw-0.0.0191
+    path: /mnt/znetboot
+    fstype: fuse.cmsfs-fuse-a
+    opts: allow_other,uid=1000
+    passno: "0"
+    dump: "0"
+  when: ansible_architecture == "s390x"
+
+- name: Make sure ELAN can access the config disk # noqa no-changed-when
+  shell:
+    cmd: |
+      ldapmodify -Zx -h {{ zvm_internal_ip_address }} -p 389 -D racfid={{ admin_uid }},profiletype=user,o=ibmzvm -w {{ admin_pwd | quote }} <<EOFLDIF
+      dn: profilename=LNXMAINT.200,profiletype=VMMDISK,o=ibmzvm
+      changetype: modify
+      add: racfaccesscontrol
+      racfaccesscontrol: ID(LXOCPB01) ACCESS(CONTROL) COUNT(0)
+      EOFLDIF
+  when: ansible_architecture == "s390x"
+
+- name: Add the dasd.conf line for LNXMAINT.200
+  lineinfile:
+    dest: /etc/dasd.conf
+    insertbefore: EOF
+    line: 0.0.0191
+  when: ansible_architecture == "s390x"
+
+- name: Install tools (dependencies of ipconf.sh and LDAPSRVcert)
+  yum:
+    name: "{{ item }}"
+    state: present
+  loop:
+  - ipcalc
+  - x3270-text
+
+- name: Install the checksmapi and ipconf scripts to local executable path
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: root
+    group: root
+    mode: 0750
+  loop:
+  - { src: "checksmapi.sh.j2", dest: "/usr/local/sbin/checksmapi.sh" }
+  - { src: "ipconf.sh.j2", dest: "/usr/local/sbin/ipconf.sh" }
+
+- name: Create systemd services for scripts
+  template:
+    src: "systemd.service.j2"
+    dest: "/usr/local/lib/systemd/system/{{ item.servicename }}.service"
+    mode: 0644
+  loop:
+  - { servicename: "smapi", cmdpath: "/usr/local/sbin/checksmapi.sh", requires: "" }
+  - { servicename: "zvm-ipconf", cmdpath: "/usr/local/sbin/ipconf.sh", requires: "smapi.service" }
+
+- name: Ensure old systemd service files don't exist
+  file:
+    path: "/etc/systemd/system/{{ item.servicename }}.service"
+    state: absent
+  loop:
+  - { servicename: "zvm-ipconf" }
+
+- name: Enable the systemd services but do not start them now
+  systemd:
+    name: "{{ item.servicename }}"
+    daemon_reload: true
+    state: stopped
+    enabled: yes
+  loop:
+  - { servicename: "zvm-ipconf" }
+
+- name: Copy files for the playbook
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: 0644
+  loop:
+  - { src: "create-certificate.yml.j2", dest: "/opt/ansible/tasks/create-certificate.yml" }
+  - { src: "regen-certificates.yml.j2", dest: "/opt/ansible/regen-certificates.yml" }
+  - { src: "update-dns-domain.yml.j2", dest: "/opt/ansible/update-dns-domain.yml" }
+  - { src: "named/cluster_domain_name.zone.j2", dest: "/opt/ansible/templates/named/cluster_domain_name.zone.j2" }
+  - { src: "named/ibmpoc_internal.zone.j2", dest: "/opt/ansible/templates/named/ibmpoc_internal.zone.j2" }
+  - { src: "named/named.conf.j2", dest: "/opt/ansible/templates/named/named.conf.j2" }
+  - { src: "named/subnet.in-addr.arpa.zone.j2", dest: "/opt/ansible/templates/named/subnet.in-addr.arpa.zone.j2" }
+  - { src: "named/zvmesi.zone.j2", dest: "/opt/ansible/templates/named/zvmesi.zone.j2" }
+  - { src: "haproxy/haproxy.cfg.j2", dest: "/opt/ansible/templates/haproxy/haproxy.cfg.j2" }
+  - { src: "settings.env.j2", dest: "/etc/zvmesi/settings.env" }

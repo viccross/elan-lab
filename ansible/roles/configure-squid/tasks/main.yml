@@ -1,0 +1,42 @@
+---
+# tasks file for configure-squid
+- name: Install squid
+  yum:
+    name:
+      - squid
+    state: present
+  notify:
+  - Restart squid
+
+- name: Create /etc/squid
+  file:
+    path: /etc/squid
+    state: directory
+    group: squid
+    mode: 0755
+
+- name: Create /etc/squid/squid.conf
+  template:
+    src: etc/squid/squid.conf.j2
+    dest: /etc/squid/squid.conf
+    group: squid
+    mode: 0640
+
+- name: Allow traffic at port 3128
+  firewalld:
+    port: 3128/tcp
+    permanent: yes
+    zone: "{{ item }}"
+    state: enabled
+  with_items:
+  - internal
+  - public
+  notify:
+  - Restart firewalld
+
+- name: Turn on squid_connect_any
+  seboolean:
+    name: squid_connect_any
+    state: yes
+    persistent: yes
+

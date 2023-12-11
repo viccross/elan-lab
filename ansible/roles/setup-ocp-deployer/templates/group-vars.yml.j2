@@ -1,0 +1,91 @@
+---
+# Configure the internal domain name of the cluster here.
+cluster_domain_name: "{% raw %}{{ cluster_name }}.{{ cluster_base_domain }}{% endraw %}"
+
+# The IP address of the local network
+# gateway, and the netmask/cidr of
+# the subnet
+subnet_in_addr_name: "{{ subnet_cidr.split('.')[:3] | reverse | join('.') }}"
+
+ocp_cluster_lan_name: "{{ ocp_cluster_lan_name }}"
+
+# This is the default node configuration.
+# Please ensure the MAC addresses are
+# correct for the hardware you are deploying to.
+# The IP addresses must be on the same subnet as
+# the cluster_subnet_prefix
+# CHANGEME!
+cluster_nodes:
+  bootstrap:
+    bootstrap-0:
+      guest_name: '{{ ocp_guest_pfx }}BOOT'
+      mac: '52:54:00:d0:f7:03'
+      ip: '{{ ip_bootstrap_0 }}'
+      disk: "{{ dev_disk[install_mode] }}"
+      ign_profile: bootstrap.ign
+  masters:
+    master-0:
+      guest_name: '{{ ocp_guest_pfx }}MAS0'
+      mac: '52:54:00:da:70:41'
+      ip: '{{ ip_master_0 }}'
+      disk: "{{ dev_disk[install_mode] }}"
+      ign_profile: master.ign
+    master-1:
+      guest_name: '{{ ocp_guest_pfx }}MAS1'
+      mac: '52:54:00:a2:93:d8'
+      ip: '{{ ip_master_1 }}'
+      disk: "{{ dev_disk[install_mode] }}"
+      ign_profile: master.ign
+    master-2:
+      guest_name: '{{ ocp_guest_pfx }}MAS2'
+      mac: '52:54:00:d9:5b:d8'
+      ip: '{{ ip_master_2 }}'
+      disk: "{{ dev_disk[install_mode] }}"
+      ign_profile: master.ign
+  workers:
+    worker-0:
+      guest_name: '{{ ocp_guest_pfx }}WRK0'
+      mac: '52:54:00:70:8b:74'
+      ip: '{{ ip_worker_0 }}'
+      disk: "{{ dev_disk[install_mode] }}"
+      ign_profile: worker.ign
+    worker-1:
+      guest_name: '{{ ocp_guest_pfx }}WRK1'
+      mac: '52:54:00:70:8b:75'
+      ip: '{{ ip_worker_1 }}'
+      disk: "{{ dev_disk[install_mode] }}"
+      ign_profile: worker.ign
+{% if ip_worker_2 is defined %}
+  bootworker:
+    worker-2:
+      guest_name: '{{ ocp_guest_pfx }}WRK2'
+      mac: '52:54:00:70:8b:76'
+      ip: '{{ ip_worker_2 }}'
+      disk: "{{ dev_disk[install_mode] }}"
+      ign_profile: worker.ign
+{% endif %}
+guestmemory:
+  bootstrap: "{{ guestmemory['bootstrap'] }}"
+  masters: "{{ guestmemory['masters'] }}"
+  workers: "{{ guestmemory['workers'] }}"
+guestvcpus:
+  bootstrap: "{{ guestvcpus['bootstrap'] }}"
+  masters: "{{ guestvcpus['masters'] }}"
+  workers: "{{ guestvcpus['workers'] }}"
+
+# The following variables should generally not need to be edited
+
+# This will be the same as the bastion private ip when
+# bastion is a separate VM, otherwise it is the gateway ip.
+# dhcp_server_ip_address is not used by default in a z/VM install
+bastion_public_ip_address: "{{ guest_install_ipaddr }}"
+
+ocp4_pull_secret: "{% raw %}{{ lookup('file', '{{ webroot }}/.secret/.ocp4_pull_secret') | from_json }}{% endraw %}"
+
+znetboot_cfg_path: "{{ znetboot_cfg_path }}"
+znetboot_cfg_disk: "{{ znetboot_cfg_disk }}"
+webroot: "{{ webroot }}"
+
+# The IP configuration will write out the cluster_base_domain variable.
+# Look for runtime.yml in the group_vars/all directory (where this file is).
+# If this is the only file in the 'all' directory then the IP configuration did not run :/

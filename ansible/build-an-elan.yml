@@ -1,0 +1,28 @@
+# Run the setup effort to build an ESI ELAN
+- name: Copy Intermediate CA cert to the ESI ELAN system
+  hosts: dev_elan_hosts
+  become: true
+  roles:
+  - copy-ca-to-elan
+  vars:
+    root_ca_key_path: "{{ hostvars['localhost']['ca_key_path'] }}"
+    root_ca_csr_path: "{{ hostvars['localhost']['ca_csr_path'] }}"
+    root_ca_cert_path: "{{ hostvars['localhost']['ca_cert_path'] }}"
+
+- name: Configure services on the ESI ELAN system
+  hosts: dev_elan_hosts
+  become: true
+  roles:
+  - almalinux-gpg
+  - install-base-packages
+  - configure-squid
+  - setup-firstboot-ipconf
+  - configure-dns
+  - configure-nfs
+  - configure-apache
+  - setup-web-resources
+  - configure-haproxy
+  - configure-cockpit
+  - configure-ignition
+  - setup-ocp-deployer
+  - setup-icic-deployer

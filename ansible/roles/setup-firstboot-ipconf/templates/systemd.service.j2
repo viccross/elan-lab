@@ -1,0 +1,10 @@
+[Unit]
+Requires=network-online.target {{ item.requires }}
+After=network-online.target named-chroot.service {{ item.requires }}
+[Service]
+Type=oneshot
+ExecStart={{ item.cmdpath }}
+RemainAfterExit=true
+StandardOutput=journal
+[Install]
+WantedBy=default.target

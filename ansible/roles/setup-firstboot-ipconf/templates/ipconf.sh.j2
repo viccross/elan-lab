@@ -1,0 +1,178 @@
+#!/bin/bash
+# ipconf.sh -- IP configuration in FastVM
+# Checks for a configuration file on the CMS disk and configures appropriately
+
+FP={{ znetboot_cfg_path }}
+IFN=enc{{ bastion_vsw_dev }}
+MYID=`vmcp q userid | awk '{print $1;}'`
+ESIGROUP=`vmcp q variable zvmesi.sysgroup`
+
+function changeIP {
+  FN=$1
+  echo "${FN} found, checking"
+  source <(grep ^IPADDR ${FN})
+  echo "IP Address is ${IPADDR}"
+  source <(grep ^NETMASK ${FN})
+  echo -n "Net mask is ${NETMASK}"
+  PFX=`ipcalc -p ${IPADDR} ${NETMASK} | sed -n 's/^PREFIX=\(.*\)/\1/p'`
+  echo ", prefix is ${PFX}"
+
+  # check if the address is the same as existing
+  # **** This check may be removed if we decide change is mandatory
+  FILEIP="${IPADDR}/$PFX"
+  SYSIP=$(ip -br addr show dev ${IFN} | awk '{print $3}')
+  if [ "${FILEIP}" = "${SYSIP}" ]; then
+    echo "IP address is already the same, exiting"
+    exit 0;
+  fi
+
+  # go ahead with the address change
+  echo "Address change is required"
+  # pull the rest of the variables
+  source <(grep ^GATEWAY ${FN})
+  echo "Gateway is ${GATEWAY}"
+  source <(grep ^HOSTNM ${FN})
+  if [ -z ${HOSTNM} ] || [ ${HOSTNM} == "lxocpb01" ]; then
+    HOSTNM="{{ guest_install_hostname }}"
+    HOSTSET="(default value)"
+  fi
+  HOSTNM=${HOSTNM,,}
+  echo "Hostname is ${HOSTNM} ${HOSTSET}"
+  source <(grep ^ZVMIPADDR ${FN})
+  ZVMIPADDR=${ZVMIPADDR,,}
+  echo "z/VM IP Address is ${ZVMIPADDR}"
+  source <(grep ^ZVMHOSTNM ${FN})
+  ZVMHOSTNM=${ZVMHOSTNM,,}
+  echo "z/VM Hostname is ${ZVMHOSTNM}"
+  source <(grep ^DOMAIN ${FN})
+  DOMAIN=${DOMAIN,,}
+  echo "Domain is ${DOMAIN}"
+  source <(grep ^DNS ${FN})
+  if [ -v DNS1 ]; then
+    DNS="${DNS1}"
+    if [ -v DNS2 ]; then
+      DNS="${DNS}; ${DNS2}"
+    fi
+    if [ -v DNS3 ]; then
+      DNS="${DNS}; ${DNS3}"
+    fi
+  fi
+  if [ ! -v DNS ]; then
+    DNS="9.9.9.9; 149.112.112.112"
+    echo "No DNS servers in configuration, using generic forwarders (Quad9)"
+  else
+    echo "DNS servers are: ${DNS}"
+  fi
+  if [ "${DOMAIN}" == "nip.io" ]; then
+    CLUSTER_NAME=$(printf '%02x' ${IPADDR//./ }; echo)
+    echo -n "Activating nip.io configuration: updating cluster_name to ${CLUSTER_NAME}... "
+    sed -i.bak 's/ocp-z-poc/${CLUSTER_NAME}/g' /opt/ansible/inventory/group_vars/all/default.yml
+    echo "done."
+  else
+    CLUSTER_NAME="ocp-z-poc"
+  fi
+
+  # all the details retrieved, let's use nmcli to do the address work
+  # first, obtain the UUID of the interface
+  source <(grep ^UUID /etc/sysconfig/network-scripts/ifcfg-${IFN})
+  if [ ! -v UUID ]; then
+    echo "UUID of interface not known, exiting!"
+    exit 1;
+  fi
+  # next, update the interface
+  nmcli con mod ${UUID} ipv4.method manual ipv4.addresses "${IPADDR}/${PFX}"
+  nmcli con mod ${UUID} ipv4.gateway "${GATEWAY}"
+  nmcli con up ${UUID}
+
+  # Update the system hostname
+  FULLDOMAIN="${CLUSTER_NAME}.${DOMAIN}"
+  echo "${HOSTNM}.${FULLDOMAIN}" > /etc/hostname
+  hostname -F /etc/hostname
+  echo "System hostname updated to $(hostname)"
+  # stop named
+  systemctl stop named-chroot.service
+  # Write out new variables to the group_vars YAML
+  cat <<EOF >> /opt/ansible/inventory/group_vars/all/runtime.yml
+bastion_public_ip_address: "${IPADDR}"
+#
+cluster_name: "${CLUSTER_NAME}"
+cluster_base_domain: "${DOMAIN}"
+dns_nameserver: "${DNS}"
+elan_host_name: "${HOSTNM}"
+zvm_ip_address: "${ZVMIPADDR}"
+zvm_host_name: "${ZVMHOSTNM}"
+esigroup: "${ESIGROUP}"
+EOF
+
+#  # Update the bastion_public_ip_address in the group_vars
+#  sed -i.bak '/bastion_public_ip_address/c \bastion_public_ip_address: '\"${IPADDR}\" /opt/ansible/inventory/group_vars/all.yml
+  # Run Ansible playbook to update the BIND configuration
+  pushd /opt/ansible && ansible-playbook -i inventory update-dns-domain.yml && popd
+  # start named
+  systemctl start named-chroot.service
+
+  # Regenerate all the certificates
+  pushd /opt/ansible && ansible-playbook -i inventory regen-certificates.yml && popd
+
+  # update Apache configuration
+  sed -i.bak -e "s/wsc.ibm/${DOMAIN}/g" -e "s/ocp-z-poc/${CLUSTER_NAME}/g" \
+    /etc/httpd/conf/httpd.conf /etc/httpd/conf.d/ssl.conf /etc/httpd/conf.d/nonssl.conf /var/www/html/ocp-console.html
+  # Hostname might have been updated, make those changes before restarting things
+  if [ -z "${HOSTSET}" ]; then
+    sed -i.bak "s/{{ guest_install_hostname }}/${HOSTNM}/g" /etc/httpd/conf/httpd.conf /etc/httpd/conf.d/ssl.conf
+  fi
+
+  # update the file in the web server directory
+  cat <<EOF > {{ webroot }}/etc.hosts
+## -----------------  Note that if you used nip.io as the top-level domain, you
+## -------------------------- don't need to add these names to your hosts file!
+${IPADDR} ${HOSTNM}.${FULLDOMAIN} api.${FULLDOMAIN}
+${IPADDR} console-openshift-console.apps.${FULLDOMAIN} oauth-openshift.apps.${FULLDOMAIN}
+## The following are used for direct access to the OCP monitoring components,
+##  add them as well if you want this direct access
+${IPADDR} grafana-openshift-monitoring.apps.${FULLDOMAIN}
+${IPADDR} prometheus-k8s-openshift-monitoring.apps.${FULLDOMAIN}
+EOF
+
+  # Restart some services due to address and hostname changes
+
+  # restart Apache
+  systemctl restart httpd.service
+  echo "Apache httpd restarted"
+  # restart HA-Proxy
+  systemctl enable haproxy.service
+  systemctl restart haproxy.service
+  echo "HA-Proxy restarted"
+  ### This is the old DNS change, comment this before removal
+#  # upstream DNS is harder, have to change the bind config...
+#  if [ -v DNS ]; then
+#    sed "s/XXX.XXX.XXX.XXX/${DNS}/g" </etc/named.conf.source >/etc/named.conf
+#    systemctl restart named-chroot
+#    echo "BIND name server restarted"
+#  fi
+
+  # If Finna is installed, go ahead and start it
+  if [ -x /usr/local/sbin/finnad ] ; then
+    systemctl enable finnad.service
+    systemctl start finnad.service
+  fi
+
+  # Start up the DASD configuration script because we're at a new site
+  systemctl start ocp-dasd.service
+  # Prevent this service from starting next time
+  systemctl disable zvm-ipconf.service
+  # Announce we've finished
+  echo "zvm-ipconf changes completed."
+}
+
+# Main starts here
+echo "Checking IP configuration for $MYID..."
+
+FN="${FP}/${MYID}.IFCFG"
+if [ -f ${FN} ]; then
+  changeIP ${FN}
+elif [ -f ${FP}/ZVMIP.CONF ]; then
+  changeIP ${FP}/ZVMIP.CONF
+else
+  echo "No IP config file found."
+fi

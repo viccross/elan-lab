@@ -1,0 +1,9 @@
+[localhost]
+atlantis     ansible_connection=local
+[dev_elan_hosts]
+elan_1       ansible_host=192.168.124.11 ansible_user=vagrant ansible_ssh_common_args='-o StrictHostKeyChecking=no -o IdentityFile=~/Code/elan-lab/.vagrant/machines/elan_1/libvirt/private_key'
+elan_2       ansible_host=192.168.124.12 ansible_user=vagrant ansible_ssh_common_args='-o StrictHostKeyChecking=no -o IdentityFile=~/Code/elan-lab/.vagrant/machines/elan_2/libvirt/private_key'
+elan_3       ansible_host=192.168.124.13 ansible_user=vagrant ansible_ssh_common_args='-o StrictHostKeyChecking=no -o IdentityFile=~/Code/elan-lab/.vagrant/machines/elan_3/libvirt/private_key'
+[zvm_hosts]
+ibmzvm-ckd-proxy  ansible_user=root ansible_ssh_common_args='-o StrictHostKeyChecking=no'
+ibmzvm-fba-proxy  ansible_user=root ansible_ssh_common_args='-o StrictHostKeyChecking=no'

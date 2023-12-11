@@ -1,0 +1,23 @@
+apiVersion: config.openshift.io/v1
+kind: OAuth
+metadata:
+  name: cluster
+spec:
+  identityProviders:
+  - name: zVMLdap
+    mappingMethod: claim
+    type: LDAP
+    ldap:
+      attributes:
+        id:
+        - dn
+        email:
+        - mail
+        name:
+        - cn
+        preferredUsername:
+        - uid
+      ca:
+        name: custom-ca
+      insecure: false
+      url: "ldap://LDAPSRV.ibmpoc.internal/ou=people,{{ ldap_base }}?uid"

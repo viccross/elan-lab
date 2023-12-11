@@ -1,0 +1,8 @@
+# Run the setup effort to build an ESI ELAN
+- name: Create a CA for the ELANs
+  hosts: localhost
+  become: true
+  roles:
+  - create-root-ca
+  - create-local-ca
+
