@@ -4,8 +4,8 @@
   tasks:
   - name: Recreate DNS Forward zone
     template:
-      src: named/cluster_domain_name.zone.j2
-      dest: /var/named/{% raw %}{{ cluster_domain_name }}{% endraw %}.zone
+      src: named/zvmesi_domain_name.zone.j2
+      dest: /var/named/{% raw %}{{ zvmesi_domain_name }}{% endraw %}.zone
       owner: named
       group: named
       mode: 0640
@@ -41,17 +41,45 @@
       group: named
       mode: 0640
 
+  - name: Create the local zone list file
+    file:
+      dest: /etc/named/rhocp.zones
+      state: touch
+      owner: named
+      group: named
+      mode: 0644
+
   - name: Recreate resolv.conf
     lineinfile:
-      line: search {% raw %}{{ cluster_domain_name }}{% endraw %}{{''}}
+      line: search {% raw %}{{ zvmesi_domain_name }}{% endraw %}{{''}}
       dest: /etc/resolv.conf
       regexp: "^search .*"
+
+  - name: Unmanage resolve.conf in NetworkManager
+    lineinfile:
+      line: dns=none
+      dest: /etc/NetworkManager/NetworkManager.conf
+      insertafter: "\\[main\\].*"
+      regexp: "^dns=.*"
+
+  - name: Restart NetworkManager to have DNS change take effect
+    systemd:
+      name: NetworkManager
+      state: restarted
+
+  - name: Use local dns in resolv.conf
+    blockinfile:
+      dest: /etc/resolv.conf
+      insertbefore: BOF
+      block: |
+        search {% raw %}{{ zvmesi_domain_name }}{% endraw %}{{''}}
+        nameserver {{ bastion_private_ip_address }}
 
   - name: Patch HAProxy service script
     lineinfile:
       dest: /usr/lib/systemd/system/haproxy.service
       regex: ^ExecStartPre=
-      line: ExecStartPre=/bin/bash -c 'until host api.{% raw %}{{ cluster_domain_name }}{% endraw %}; do sleep 1; done' && /usr/sbin/haproxy -f $CONFIG -c -q
+      line: ExecStartPre=/bin/bash -c 'until host {% raw %}{{ elan_host_name }}{{ zvmesi_domain_name }}{% endraw %}; do sleep 1; done' && /usr/sbin/haproxy -f $CONFIG -c -q
 
   - name: Signal systemd to reload
     systemd: daemon_reload=yes

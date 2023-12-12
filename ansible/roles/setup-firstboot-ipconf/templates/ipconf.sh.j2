@@ -98,7 +98,7 @@ function changeIP {
 #  nmcli con up ${UUID}
 
   # Update the system hostname
-  FULLDOMAIN="${CLUSTER_NAME}.${DOMAIN}"
+  FULLDOMAIN="${ESIGROUP}.${DOMAIN}"
   echo "${HOSTNM}.${FULLDOMAIN}" > /etc/hostname
   hostname -F /etc/hostname
   echo "System hostname updated to $(hostname)"
@@ -115,6 +115,7 @@ elan_host_name: "${HOSTNM}"
 zvm_ip_address: "${ZVMIPADDR}"
 zvm_host_name: "${ZVMHOSTNM}"
 esigroup: "${ESIGROUP}"
+zvmesi_domain_name: "{% raw %}{{ esigroup }}.{{ cluster_base_domain }}{% endraw %}"
 EOF
 
 #  # Update the bastion_public_ip_address in the group_vars

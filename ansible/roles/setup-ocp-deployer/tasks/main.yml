@@ -44,7 +44,7 @@
     mode: 0755
   environment: "{{ local_proxy_env | default(omit) }}"
 
-- name: Ensure the Ansible playbook directories exist on the host
+- name: Ensure the Ansible playbook (and other) directories exist on the host
   file:
     path: "{{ item }}"
     state: directory
@@ -56,6 +56,7 @@
     - "/opt/ansible/tasks"
     - "/opt/ansible/inventory/group_vars"
     - "/opt/ansible/inventory/group_vars/all"
+    - "/opt/registry/certs"
 
 - name: Download and set permissions for openshift-install and oc
   include_tasks: download-clients.yml
