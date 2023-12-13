@@ -81,6 +81,7 @@
 
 - name: Correct permissions on rndc key file
   file:
+    path: /etc/rndc.key
     state: file
     mode: 0600
     owner: named

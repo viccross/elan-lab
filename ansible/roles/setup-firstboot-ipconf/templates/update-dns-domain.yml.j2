@@ -29,10 +29,22 @@
   - name: Create new finnad forward zone
     template:
       src: named/zvmesi.zone.j2
-      dest: /var/named/{% raw %}{{ esigroup }}{% endraw %}.zvmesi.zone
+      dest: /var/named/{% raw %}{{ esigroup | lower }}{% endraw %}.zvmesi.zone
       owner: named
       group: named
       mode: 0640
+
+  - name: Create named.conf fragments for new zones
+    template:
+      src: named/masterzone.conf.j2
+      dest: /etc/named/{% raw %}{{ item }}{% endraw %}.conf
+      group: named
+      mode: 0640
+    vars:
+      domain_name: "{% raw %}{{ item }}{% endraw %}"
+    loop:
+      - "{% raw %}{{ zvmesi_domain_name }}{% endraw %}"
+      - "{% raw %}{{ esigroup | lower }}{% endraw %}.zvmesi"
 
   - name: Recreate /etc/named.conf
     template:
@@ -41,13 +53,14 @@
       group: named
       mode: 0640
 
-  - name: Create the local zone list file
-    file:
-      dest: /etc/named/rhocp.zones
-      state: touch
-      owner: named
-      group: named
-      mode: 0644
+  - name: Add the tags for the named.conf fragments
+    lineinfile:
+      line: include "/etc/named/{% raw %}{{ item }}{% endraw %}.conf";
+      dest: /etc/named.conf
+      insertafter: "// z/VM ESI zones"
+    loop:
+      - "{% raw %}{{ zvmesi_domain_name }}{% endraw %}"
+      - "{% raw %}{{ esigroup | lower }}{% endraw %}.zvmesi"
 
   - name: Recreate resolv.conf
     lineinfile:

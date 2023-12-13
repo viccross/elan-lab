@@ -47,6 +47,7 @@
   - name: stop the FTP server on z/VM # noqa command-instead-of-shell no-changed-when
     shell: /usr/local/bin/smcli id -T FTPSERVE -H {{ zvm_internal_ip_address|quote }}/44444 -U {{ smapi_user|quote }} -P {{ smapi_password|quote }}
     when:
+      - ansible_architecture == "s390x"
       - '"Image already active" not in ret.stdout'
 
   - name: make sure GSKADMIN can be logged on by IBMAUTO

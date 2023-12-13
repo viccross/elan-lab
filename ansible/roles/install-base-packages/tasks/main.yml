@@ -37,6 +37,8 @@
     name:
       - ansible
       - unzip
+      - python3-dns
+      - python3.11-dns
       - python3-libsemanage
       - incron
       - nfs-utils

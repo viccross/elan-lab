@@ -98,12 +98,18 @@ function changeIP {
 #  nmcli con up ${UUID}
 
   # Update the system hostname
-  FULLDOMAIN="${ESIGROUP}.${DOMAIN}"
+  FULLDOMAIN="${ESIGROUP,,}.${DOMAIN}"
   echo "${HOSTNM}.${FULLDOMAIN}" > /etc/hostname
   hostname -F /etc/hostname
   echo "System hostname updated to $(hostname)"
   # stop named
   systemctl stop named-chroot.service
+
+  # Generate TSIG key
+  tsig-keygen ${ESIGROUP,,}-key > /etc/named/${ESIGROUP,,}.key
+  # Extract BIND TSIG key
+  TSIGKEY=$(grep secret /etc/named/${ESIGROUP,,}.key | awk -F'"' '{ print $2;}')
+
   # Write out new variables to the group_vars YAML
   cat <<EOF >> /opt/ansible/inventory/group_vars/all/runtime.yml
 bastion_public_ip_address: "${IPADDR}"
@@ -115,7 +121,8 @@ elan_host_name: "${HOSTNM}"
 zvm_ip_address: "${ZVMIPADDR}"
 zvm_host_name: "${ZVMHOSTNM}"
 esigroup: "${ESIGROUP}"
-zvmesi_domain_name: "{% raw %}{{ esigroup }}.{{ cluster_base_domain }}{% endraw %}"
+zvmesi_domain_name: "{% raw %}{{ esigroup | lower }}.{{ cluster_base_domain }}{% endraw %}"
+tsigkey: "${TSIGKEY}"
 EOF
 
 #  # Update the bastion_public_ip_address in the group_vars
@@ -171,8 +178,13 @@ EOF
     systemctl start finnad.service
   fi
 
-  # Start up the DASD configuration script because we're at a new site
-  systemctl start ocp-dasd.service
+  # Start incrond
+  systemctl enable --now incrond.service
+
+# Change for Testing:
+# Disable the start of ocp-dasd service
+#   # Start up the DASD configuration script because we're at a new site
+#   systemctl start ocp-dasd.service
   # Prevent this service from starting next time
   systemctl disable zvm-ipconf.service
   # Announce we've finished

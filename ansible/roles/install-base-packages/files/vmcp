@@ -65,7 +65,7 @@ case $CMD in
       "VAR" | "VARIABLE" )
         case $P1 in
           "ZVMESI.INSTALLATION" )
-            echo "7304v ECKD-Vic-Dev"
+            echo "7304v-ECKD-Vic-Dev"
 	  ;;
           "ZVMESI.SYSGROUP" )
             cat /mnt/znetboot/var.esi.sysgroup
