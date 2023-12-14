@@ -158,6 +158,13 @@
         dest: "{{ webroot }}/ESICA.pem"
         state: link
 
+  - name: Patch the basic stats script, if needed
+    lineinfile:
+      line: my $vmcpCmd="/usr/local/bin/vmcp";              # the vmcp command
+      dest: "{{ webroot }}/scripts/metrics.pl"
+      regexp: "^my \\$vmcpCmd.*"
+    when: ansible_architecture != "s390x"
+
   - name: Install the basic stats script to local executable path
     shell:
       cmd: "mv {{ webroot }}/scripts/metrics.pl /usr/local/sbin/ && rmdir {{ webroot }}/scripts"
