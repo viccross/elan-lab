@@ -91,7 +91,7 @@ case $CMD in
         ;;
           "" )
             echo "SYSTEM ZVMESI.SYSGROUP $(cat /mnt/znetboot/var.esi.sysgroup)"
-            echo "SYSTEM ZVMESI.INSTALLATION 7304v ECKD-Vic-Dev"
+            echo "SYSTEM ZVMESI.INSTALLATION 7304v-ECKD-Vic-Dev"
         ;;
           * )
             echo ""
