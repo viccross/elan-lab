@@ -24,6 +24,36 @@
       mode: 0644
     when: local_proxy_env is defined
 
+- name: Create the directory for mounting the repodir
+  file:
+    path: /srv/repodir
+    state: directory
+
+- name: Install nfs-utils
+  yum:
+    name: nfs-utils
+    state: present
+
+- name: Mount the dnf-local NFS directory
+  mount:
+    src: 192.168.124.1:/srv/ml2/dnf-local
+    path: /srv/repodir
+    opts: rw,sync,hard
+    state: mounted
+    fstype: nfs
+    
+#- name: Install and configure dnf-local-plugin
+#  block:
+#  - name: Add the plugin
+#    yum:
+#      name: python3-dnf-plugin-local
+#      state: present
+#  - name: Configure the plugin
+#    lineinfile:
+#      line: repodir = /srv/repodir
+#      dest: /etc/dnf/plugins/local.conf
+#      regexp: "repodir"
+
 - name: Add the internal YUM repo
   yum_repository:
     name: zvmesi
@@ -41,7 +71,6 @@
       - python3.11-dns
       - python3-libsemanage
       - incron
-      - nfs-utils
       - openldap-clients
       - cockpit
       - cockpit-packagekit
