@@ -3,6 +3,7 @@
   yum:
     name:
       - php
+      - php-json
       - php-ldap
       - php-mbstring
     state: present
