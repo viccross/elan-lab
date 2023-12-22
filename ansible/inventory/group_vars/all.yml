@@ -19,7 +19,7 @@ ibmvm1_pass: "ibmzvm730"
 webroot: "/var/www/html"
 meta_header_file: "s_header.html"
 #elan_web_version: "0.8.3"
-elan_web_version: "ocp-redesign"
+elan_web_version: "ocp_redesign"
 elan_web_pkgname: "elan-web-{{ elan_web_version }}"
 #
 # CA paramaters

@@ -106,62 +106,68 @@
     dest: "{{ webroot }}/w3ds"
     creates: "{{ webroot }}/w3ds/w3ds.js"
 
-- name: Download and unzip site structure
-  unarchive:
-    src: "/opt/resources/{{ elan_web_pkgname }}.zip"
-    dest: "{{ webroot }}/"
-    creates: "{{ webroot }}/{{ elan_web_pkgname }}/{{ meta_header_file }}"
-
-- name: Move downloaded site directory # noqa no-free-form
-  shell:
-    cmd: |
-      rm -rf {{ webroot }}/{scripts,justgage} \
-      rm -rf {{ webroot }}/{{ elan_web_pkgname }}/{build,tests,.travis.yml} \
-      && mv {{ webroot }}/{{ elan_web_pkgname }}/* {{ webroot }}/ \
-      && rm -rf {{ webroot }}/{{ elan_web_pkgname }}
-    removes: "{{ webroot }}/{{ elan_web_pkgname }}"
-
-- name: Set permission on the HTML files to enable Includes
-  file:
-    path: "{{ webroot }}/{{ item }}"
-    owner: root
-    group: apache
-    mode: 0750
-  loop:
-    - ocp-cockpit.html
-    - ocp-console.html
-    - ocp-haproxy.html
-    - ocp-perfkit.html
-    - dashboard.html
-    - metrics.html
-    - gethelp.html
-    - index.html
-    - s_header.html
-    - s_index.html
-    - starticic.html
-    - startocp.html
-
-- name: Additional setup tasks for testing
+- name: Set up the site structure (s390x version)
   block:
-    - name: Set permission on the additional HTML files in testing
-      file:
-        path: "{{ webroot }}/{{ item }}"
-        owner: root
-        group: apache
-        mode: 0750
-      loop:
-        - "filecreds.html"
-    - name: Create directories for work files
-      file:
-        path: "{{ webroot }}/{{ item }}"
-        owner: apache
-        group: root
-        mode: 0750
-        setype: httpd_sys_rw_content_t
-        state: directory
-      loop:
-        - ".cluster"
-  when: elan_web_version == "ocp-redesign"
+  - name: Download and unzip site structure
+    unarchive:
+      src: "/opt/resources/{{ elan_web_pkgname }}.zip"
+      dest: "{{ webroot }}/"
+      creates: "{{ webroot }}/{{ elan_web_pkgname }}/{{ meta_header_file }}"
+  - name: Move downloaded site directory # noqa no-free-form
+    shell:
+      cmd: |
+        rm -rf {{ webroot }}/{scripts,justgage} \
+        rm -rf {{ webroot }}/{{ elan_web_pkgname }}/{build,tests,.travis.yml} \
+        && mv {{ webroot }}/{{ elan_web_pkgname }}/* {{ webroot }}/ \
+        && rm -rf {{ webroot }}/{{ elan_web_pkgname }}
+      removes: "{{ webroot }}/{{ elan_web_pkgname }}"
+  - name: Set permission on the HTML files to enable Includes
+    file:
+      path: "{{ webroot }}/{{ item }}"
+      owner: root
+      group: apache
+      mode: 0750
+    loop:
+      - ocp-cockpit.html
+      - ocp-console.html
+      - ocp-haproxy.html
+      - ocp-perfkit.html
+      - dashboard.html
+      - metrics.html
+      - gethelp.html
+      - index.html
+      - s_header.html
+      - s_index.html
+      - starticic.html
+      - startocp.html
+  - name: Additional setup tasks for testing
+    block:
+      - name: Set permission on the additional HTML files in testing
+        file:
+          path: "{{ webroot }}/{{ item }}"
+          owner: root
+          group: apache
+          mode: 0750
+        loop:
+          - "filecreds.html"
+      - name: Create directories for work files
+        file:
+          path: "{{ webroot }}/{{ item }}"
+          owner: apache
+          group: root
+          mode: 0750
+          setype: httpd_sys_rw_content_t
+          state: directory
+        loop:
+          - ".cluster"
+    when: elan_web_version == "ocp_redesign"
+  when: ansible_architecture == "s390x"
+
+- name: Install the web site RPM
+  yum:
+    name: elan-web
+    state: latest
+  when: ansible_architecture != "s390x"
 
 - name: Symlink to the CA certificates
   block:
@@ -181,17 +187,18 @@
       dest: "{{ webroot }}/ESICA.pem"
       state: link
 
-- name: Patch the basic stats script, if needed
-  lineinfile:
-    line: my $vmcpCmd="/usr/local/bin/vmcp";              # the vmcp command
-    dest: "{{ webroot }}/scripts/metrics.pl"
-    regexp: "^my \\$vmcpCmd.*"
-  when: ansible_architecture != "s390x"
-
 - name: Install the basic stats script to local executable path
   shell:
     cmd: "mv {{ webroot }}/scripts/metrics.pl /usr/local/sbin/ && rmdir {{ webroot }}/scripts"
     removes: "{{ webroot }}/scripts"
+  when: ansible_architecture == "s390x"
+
+- name: Patch the basic stats script, if needed
+  lineinfile:
+    line: my $vmcpCmd="/usr/local/bin/vmcp";              # the vmcp command
+    dest: /usr/local/sbin/metrics.pl
+    regexp: "^my \\$vmcpCmd.*"
+  when: ansible_architecture != "s390x"
 
 - name: Set permission on metrics.pl
   file:
