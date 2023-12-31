@@ -21,6 +21,10 @@ echo "--buffer=<size>   valid values are from 4096 to 1048576 bytes"
 echo "                  the k and M suffixes are also supported"
 }
 
+plusminus() {
+  echo -n $(( ((RANDOM%3) - 1 ) + $1 ))
+}
+
 CMD=${1^^}
 OPT=${2^^}
 P1=${3^^}
@@ -108,10 +112,33 @@ case $CMD in
   "IND" | "INDICATE" )
     case $OPT in
       "LOAD" | "" )
-        echo "AVGPROC-005% 0006"
+        cpu=$(( RANDOM % 100 ))
+        page=$(( RANDOM % 1000 ))
+        printf "AVGPROC-%03d%% 0006\n" $cpu
         echo "MDC READS-000013/SEC WRITES-000001/SEC HIT RATIO-100%"
-        echo "PAGING-0/SEC"
-        echo "Q0-00001 Q1-00005           Q2-00004 EXPAN-002 Q3-00019 EXPAN-002"
+        printf "PAGING-%d/SEC\n" $page
+        echo "Q0-00001(00000)                           DORMANT-00023"
+        echo "Q1-00005(00000)           E1-00000(00000)"
+        echo "Q2-00000(00000) EXPAN-000 E2-00000(00000)"
+        echo "Q3-00001(00000) EXPAN-001 E3-00000(00000)"
+        echo ""
+        echo -n "PROC 0000-"
+        printf "%03d" $(plusminus $cpu)
+        echo -n "% IFL  VM     PROC 0001-"
+        printf "%03d" $(plusminus $cpu)
+        echo "% IFL  VM"
+        echo -n "PROC 0002-"
+        printf "%03d" $(plusminus $cpu)
+        echo -n "% IFL  VL     PROC 0003-"
+        printf "%03d" $(plusminus $cpu)
+        echo "% IFL  VL"
+        echo -n "PROC 0004-"
+        printf "%03d" $(plusminus $cpu)
+        echo -n "% IFL  VL     PROC 0005-"
+        printf "%03d" $(plusminus $cpu)
+        echo "% IFL  VL"
+        echo ""
+        echo "LIMITED-00000"
       ;;
       "USER" )
         case $P1 in

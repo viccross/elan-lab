@@ -21,11 +21,11 @@ use_cmsfs_for_znetboot_cfg: true
 #guest_install_baseurl: "http://9.60.86.79/install/alma86"
 #guest_install_repo_baseos: "BaseOS"
 #guest_install_repo_appstream: "AppStream"
-# upstream_proxy_ip: 10.2.55.220
-# upstream_proxy_port: 3128
-# local_proxy_env:
-#   http_proxy: http://{{ upstream_proxy_ip }}:{{ upstream_proxy_port }}
-#   https_proxy: http://{{ upstream_proxy_ip }}:{{ upstream_proxy_port }}
+upstream_proxy_ip: 192.168.124.1
+upstream_proxy_port: 3128
+local_proxy_env:
+  http_proxy: http://{{ upstream_proxy_ip }}:{{ upstream_proxy_port }}
+  https_proxy: http://{{ upstream_proxy_ip }}:{{ upstream_proxy_port }}
 #
 # smapi parameters
 smapi_host: "9.60.86.73"

@@ -152,14 +152,15 @@
           - "filecreds.html"
       - name: Create directories for work files
         file:
-          path: "{{ webroot }}/{{ item }}"
+          path: "{{ item }}"
           owner: apache
           group: root
           mode: 0750
           setype: httpd_sys_rw_content_t
           state: directory
         loop:
-          - ".cluster"
+          - "{{ webroot }}/.cluster"
+          - "/opt/content"
     when: elan_web_version == "ocp_redesign"
   when: ansible_architecture == "s390x"
 
@@ -225,16 +226,17 @@
     name: MAILTO
     value: root
 
-- name: Create/set permission on secret directory and Smarty template cache
+- name: Create/set permission on secret directory, Smarty template cache, and content directory
   file:
-    path: "{{ webroot }}/{{ item }}"
+    path: "{{ item }}"
     owner: apache
     mode: 0750
     setype: httpd_sys_rw_content_t
     state: directory
   loop:
-    - ".secret"
-    - "service-desk-racf-master/templates_c"
+    - "{{ webroot }}/.secret"
+    - "{{ webroot }}/service-desk-racf-master/templates_c"
+    - "/opt/content"
 
 - name: Create and set perms on incrond trigger files
   file:
@@ -275,6 +277,19 @@
     setype: httpd_sys_rw_content_t
     mode: 0644
 
+- name: Patch php.ini for uploads
+  block:
+  - name: Patch post_max_size
+    lineinfile:
+      dest: /etc/php.ini
+      regex: ^post_max_size
+      line: post_max_size = 0
+  - name: Patch upload_max_filesize
+    lineinfile:
+      dest: /etc/php.ini
+      regex: ^upload_max_filesize
+      line: upload_max_filesize = 0
+
 - name: Permit SELinux access to network from Apache (for reverse proxy)
   seboolean:
     name: httpd_can_network_connect
@@ -290,5 +305,11 @@
 - name: Restart httpd
   service:
     name: httpd.service
+    state: restarted
+    enabled: yes
+
+- name: Restart php-fpm
+  service:
+    name: php-fpm.service
     state: restarted
     enabled: yes

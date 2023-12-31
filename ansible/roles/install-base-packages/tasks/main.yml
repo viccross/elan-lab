@@ -78,4 +78,5 @@
       - cockpit-system
       - cockpit-ws
       - elan-tools
-    state: present
+      - squashfs-tools
+    state: latest
