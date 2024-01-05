@@ -6,6 +6,7 @@
     owner: root
     group: root
     mode: 0755
+  when: ansible_architecture != "s390x"
 
 - name: Install EPEL repository
   block:
@@ -24,23 +25,25 @@
       mode: 0644
     when: local_proxy_env is defined
 
-- name: Create the directory for mounting the repodir
-  file:
-    path: /srv/repodir
-    state: directory
-
 - name: Install nfs-utils
   yum:
     name: nfs-utils
     state: present
 
-- name: Mount the dnf-local NFS directory
-  mount:
-    src: 192.168.124.1:/srv/ml2/dnf-local
-    path: /srv/repodir
-    opts: rw,sync,hard
-    state: mounted
-    fstype: nfs
+- name: Set up local NFS in Vic's testlab
+  block:
+  - name: Create the directory for mounting the repodir
+    file:
+      path: /srv/repodir
+      state: directory
+  - name: Mount the dnf-local NFS directory
+    mount:
+      src: 192.168.124.1:/srv/ml2/dnf-local
+      path: /srv/repodir
+      opts: rw,sync,hard
+      state: mounted
+      fstype: nfs
+  when: ansible_architecture != "s390x"
     
 #- name: Install and configure dnf-local-plugin
 #  block:
@@ -58,7 +61,7 @@
   yum_repository:
     name: zvmesi
     description: z/VM ESI Support Code
-    baseurl: http://192.168.124.1/zvmesi
+    baseurl: "{{ local_repo_uri }}"
     gpgcheck: no
     sslverify: no
 
