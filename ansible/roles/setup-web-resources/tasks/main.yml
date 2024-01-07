@@ -226,7 +226,7 @@
     name: MAILTO
     value: root
 
-- name: Create/set permission on secret directory, Smarty template cache, and content directory
+- name: Create/set permission on directories: secrets, Smarty template cache, content, and install
   file:
     path: "{{ item }}"
     owner: apache
@@ -237,6 +237,7 @@
     - "{{ webroot }}/.secret"
     - "{{ webroot }}/service-desk-racf-master/templates_c"
     - "/opt/content"
+    - "{{ webroot }}/install"
 
 - name: Create and set perms on incrond trigger files
   file:
