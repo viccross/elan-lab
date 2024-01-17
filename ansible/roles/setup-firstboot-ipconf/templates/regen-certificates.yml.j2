@@ -53,8 +53,7 @@
   - name: make sure GSKADMIN can be logged on by IBMAUTO
     shell:
       cmd: |
-        ldapmodify -Zx -h LDAPSRV.ibmpoc.internal -p 389 -D racfid={{ smapi_user }},profiletype=user,o=ibmzvm -w '{{ smapi_password
-}}' <<EOFLDIF
+        ldapmodify -Zx -h LDAPSRV.ibmpoc.internal -p 389 -D racfid={{ smapi_user }},profiletype=user,o=ibmzvm -w '{{ smapi_password }}' <<EOFLDIF
         dn: profilename=LOGONBY.GSKADMIN,profiletype=SURROGAT,o=ibmzvm
         changetype: modify
         add: racfaccesscontrol
