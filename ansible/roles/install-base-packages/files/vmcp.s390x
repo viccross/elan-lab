@@ -8,5 +8,5 @@ if [[ ${1^^} == "Q" && ${2^^} == "USERID" ]]; then
 	hn=$(hostname -s)
 	echo "${hn^^} AT ZVMESI${hn:0-1}"
 else
-	$@
+	/usr/sbin/vmcp $@
 fi
