@@ -13,11 +13,12 @@ usage() {
 	echo "usage: $0 ACTION [TARGET]"
 	echo 
 	echo "ACTIONS"
-	echo "  up       Start the lab or individual machine"
-	echo "  halt     Stop the lab or individual machine"
-	echo "  destroy  Stop the lab (or individual machine) and target"
-	echo "           it/them for rebuild"
+	echo "  up        Start the lab or individual machine"
+	echo "  halt      Stop the lab or individual machine"
+	echo "  destroy   Stop the lab (or individual machine) and target"
+	echo "            it/them for rebuild"
 	echo "  provision Run the provisioning"
+	echo "  status    Show the state of the lab"
 	echo
 	echo "TARGET is an optional machine name for the action"
 }
@@ -68,10 +69,25 @@ case $1 in
 	up)
 		if [[ -z $2 ]]; then
 			startall
-			setall 200
+			if [[ "$(cat .lxelan* | uniq | wc -l)" == "1" && "$(cat .lxelan01)" == "destroyed" ]]; then
+				provall
+				setall 200
+			else
+				for num in $(seq 1 3); do
+					if [[ "$(cat .lxelan0${num})" == "destroyed" ]]; then
+						provone lxelan0${num}
+						chvmipl -i 200 lxelan0${num}
+					else
+						echo "lxelan0${num} already provisioned"
+					fi
+				done
+			fi
 		else
 			chvm -a $2
 			chvmipl -i 200 $2
+			if [[ "$(cat .$2)" == "destroyed" ]]; then
+				provone $2
+			fi
 		fi
 	;;
 	halt)
@@ -100,6 +116,14 @@ case $1 in
 		else
 			provone $2
 		fi
+	;;
+	status)
+		echo "ELAN-lab status:"
+		for num in $(seq 1 3); do
+			updown=$(if lsvm -s lxelan0${num} >/dev/null; then echo "up"; else echo "down"; fi)
+			prov=$(cat .lxelan0${num})
+			printf "lxelan0%d is %s and %s\n" ${num} ${updown} ${prov}
+		done
 	;;
 	*)
 		echo "Not a valid action" 
