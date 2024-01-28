@@ -32,9 +32,13 @@
       cmsfs-fuse -a $@
   when: ansible_architecture == "s390x"
 
+- name: Bring the LNXMAINT.200 device online
+  shell:
+    cmd: chzdev -e 0.0.0191
+
 - name: Add the fstab entry for LNXMAINT.200
   mount:
-    state: present
+    state: mounted
     src: /dev/disk/by-path/ccw-0.0.0191
     path: /mnt/znetboot
     fstype: fuse.cmsfs-fuse-a
@@ -43,16 +47,16 @@
     dump: "0"
   when: ansible_architecture == "s390x"
 
-- name: Make sure ELAN can access the config disk # noqa no-changed-when
-  shell:
-    cmd: |
-      ldapmodify -Zx -h {{ zvm_internal_ip_address }} -p 389 -D racfid={{ admin_uid }},profiletype=user,o=ibmzvm -w {{ admin_pwd | quote }} <<EOFLDIF
-      dn: profilename=LNXMAINT.200,profiletype=VMMDISK,o=ibmzvm
-      changetype: modify
-      add: racfaccesscontrol
-      racfaccesscontrol: ID(LXOCPB01) ACCESS(CONTROL) COUNT(0)
-      EOFLDIF
-  when: ansible_architecture == "s390x"
+  #- name: Make sure ELAN can access the config disk # noqa no-changed-when
+  #  shell:
+  #    cmd: |
+  #      ldapmodify -Zx -h {{ zvm_internal_ip_address }} -p 389 -D racfid={{ admin_uid }},profiletype=user,o=ibmzvm -w {{ admin_pwd | quote }} <<EOFLDIF
+  #      dn: profilename=LNXMAINT.200,profiletype=VMMDISK,o=ibmzvm
+  #      changetype: modify
+  #      add: racfaccesscontrol
+  #      racfaccesscontrol: ID(LXOCPB01) ACCESS(CONTROL) COUNT(0)
+  #      EOFLDIF
+  #  when: ansible_architecture == "s390x"
 
 - name: Add the dasd.conf line for LNXMAINT.200
   lineinfile:

@@ -1,0 +1,12 @@
+#!/bin/bash
+#
+# vmcp wrapper for s390x
+# need to fake out finnad for our different systems
+#
+
+if [[ ${1^^} == "Q" && ${2^^} == "USERID" ]]; then
+	hn=$(hostname -s)
+	echo "${hn^^} AT ZVMESI${hn:0-1}"
+else
+	$@
+fi

@@ -32,16 +32,19 @@
   hosts: elan_1
   become: true
   tasks:
-  - name: Slurp ssh privkey
-    tags: config
-    slurp:
-      src: ~/.ssh/id_rsa
-    register: elan_privkey
-  - name: Slurp ssh pubkey
-    tags: config
-    slurp:
-      src: ~/.ssh/id_rsa.pub
-    register: elan_pubkey
+  - name: Get the SSH key files
+    when: ansible_architecture != "s390x"
+    block:
+    - name: Slurp ssh privkey
+      tags: config
+      slurp:
+        src: ~/.ssh/id_rsa
+      register: elan_privkey
+    - name: Slurp ssh pubkey
+      tags: config
+      slurp:
+        src: ~/.ssh/id_rsa.pub
+      register: elan_pubkey
 
 - name: Push the SSH key file(s)
   hosts:
@@ -49,18 +52,21 @@
     - elan_3
   become: true
   tasks:
-  - name: Drop privkey into ssh dir
-    copy:
-      content: "{{ hostvars['elan_1'].elan_privkey['content'] | b64decode }}"
-      dest: ~/.ssh/id_rsa
-  - name: Drop public key into ssh dir
-    copy:
-      content: "{{ hostvars['elan_1'].elan_pubkey['content'] | b64decode }}"
-      dest: ~/.ssh/id_rsa.pub
-  - name: Drop public key into authorized_keys
-    copy:
-      content: "{{ hostvars['elan_1'].elan_pubkey['content'] | b64decode }}"
-      dest: ~/.ssh/authorized_keys
+  - name: Put the SSH keys into the other hosts
+    when: ansible_architecture != "s390x"
+    block:
+    - name: Drop privkey into ssh dir
+      copy:
+        content: "{{ hostvars['elan_1'].elan_privkey['content'] | b64decode }}"
+        dest: ~/.ssh/id_rsa
+    - name: Drop public key into ssh dir
+      copy:
+        content: "{{ hostvars['elan_1'].elan_pubkey['content'] | b64decode }}"
+        dest: ~/.ssh/id_rsa.pub
+    - name: Drop public key into authorized_keys
+      copy:
+        content: "{{ hostvars['elan_1'].elan_pubkey['content'] | b64decode }}"
+        dest: ~/.ssh/authorized_keys
 
 - name: Let handlers run from the previous play before starting next
   hosts: dev_elan_hosts

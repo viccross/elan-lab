@@ -1,18 +1,17 @@
 ---
 - name: Copy the vmcp script
   copy:
-    src: vmcp
-    dest: /usr/local/bin/vmcp
+    src: vmcp.{{ ansible_architecture }}
+    dest: /usr/local/sbin/vmcp
     owner: root
     group: root
     mode: 0755
-  when: ansible_architecture != "s390x"
 
 - name: Install EPEL repository
   block:
   - name: Install EPEL RPM
     yum:
-      name: https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+      name: https://dl.fedoraproject.org/pub/epel/epel-release-latest-{{ ansible_distribution_major_version }}.noarch.rpm
       state: present
     environment: "{{ local_proxy_env | default(omit) }}"
   - name: Patch YUM/DNF for the proxy, if set
@@ -31,6 +30,7 @@
     state: present
 
 - name: Set up local NFS in Vic's testlab
+  when: ansible_architecture != "s390x"
   block:
   - name: Create the directory for mounting the repodir
     file:
@@ -43,7 +43,6 @@
       opts: rw,sync,hard
       state: mounted
       fstype: nfs
-  when: ansible_architecture != "s390x"
     
 #- name: Install and configure dnf-local-plugin
 #  block:
@@ -82,4 +81,5 @@
       - cockpit-ws
       - elan-tools
       - squashfs-tools
+      - fuse
     state: latest

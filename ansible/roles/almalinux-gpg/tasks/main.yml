@@ -1,9 +1,24 @@
 ---
-- name: Set up AlmaLinux GPG key
-  rpm_key:
-    state: present
-    key: https://repo.almalinux.org/almalinux/RPM-GPG-KEY-AlmaLinux
-- name: Set up EPEL GPG key
-  rpm_key:
-    state: present
-    key: https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-8
+- name: Set up RPM GPG keys for atlantis
+  when: ansible_architecture != "s390x"
+  block:
+  - name: Set up AlmaLinux GPG key
+    rpm_key:
+      state: present
+      key: https://repo.almalinux.org/almalinux/RPM-GPG-KEY-AlmaLinux
+  - name: Set up EPEL GPG key
+    rpm_key:
+      state: present
+      key: https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-8
+
+- name: Set up RPM GPG keys for zvm-lab
+  when: ansible_architecture == "s390x"
+  block:
+  - name: Set up AlmaLinux GPG key
+    rpm_key:
+      state: present
+      key: https://repo.almalinux.org/almalinux/RPM-GPG-KEY-AlmaLinux-9
+  - name: Set up EPEL GPG key
+    rpm_key:
+      state: present
+      key: https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-9

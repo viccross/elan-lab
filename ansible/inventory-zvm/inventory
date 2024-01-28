@@ -1,0 +1,9 @@
+[localhost]
+lxocpb01     ansible_connection=local
+[dev_elan_hosts]
+elan_1       ansible_host=9.33.124.44 ansible_user=root ansible_ssh_common_args='-o StrictHostKeyChecking=no'
+elan_2       ansible_host=9.33.124.45 ansible_user=root ansible_ssh_common_args='-o StrictHostKeyChecking=no'
+elan_3       ansible_host=9.33.124.46 ansible_user=root ansible_ssh_common_args='-o StrictHostKeyChecking=no'
+[zvm_hosts]
+ibmzvm-ckd-proxy  ansible_user=root ansible_ssh_common_args='-o StrictHostKeyChecking=no'
+ibmzvm-fba-proxy  ansible_user=root ansible_ssh_common_args='-o StrictHostKeyChecking=no'

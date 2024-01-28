@@ -36,7 +36,7 @@ case $CMD in
       ;;
       "USERID" )
         hn=$(hostname -s)
-        echo "LXOCPB01 AT ZVMESI${hn:0-1}"
+        echo "${hn^^} AT ZVMESI${hn:0-1}"
       ;;
       "ALLOC" )
         case $P1 in

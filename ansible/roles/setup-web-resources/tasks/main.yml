@@ -107,6 +107,7 @@
     creates: "{{ webroot }}/w3ds/w3ds.js"
 
 - name: Set up the site structure (s390x version)
+  when: ansible_architecture == "s390x"
   block:
   - name: Download and unzip site structure
     unarchive:
@@ -116,7 +117,7 @@
   - name: Move downloaded site directory # noqa no-free-form
     shell:
       cmd: |
-        rm -rf {{ webroot }}/{scripts,justgage} \
+        rm -rf {{ webroot }}/{scripts,justgage,images} \
         rm -rf {{ webroot }}/{{ elan_web_pkgname }}/{build,tests,.travis.yml} \
         && mv {{ webroot }}/{{ elan_web_pkgname }}/* {{ webroot }}/ \
         && rm -rf {{ webroot }}/{{ elan_web_pkgname }}
@@ -141,6 +142,7 @@
       - starticic.html
       - startocp.html
   - name: Additional setup tasks for testing
+    when: elan_web_version == "ocp_redesign"
     block:
       - name: Set permission on the additional HTML files in testing
         file:
@@ -161,8 +163,6 @@
         loop:
           - "{{ webroot }}/.cluster"
           - "/opt/content"
-    when: elan_web_version == "ocp_redesign"
-  when: ansible_architecture == "s390x"
 
 - name: Install the web site RPM
   yum:
@@ -196,7 +196,7 @@
 
 - name: Patch the basic stats script, if needed
   lineinfile:
-    line: my $vmcpCmd="/usr/local/bin/vmcp";              # the vmcp command
+    line: my $vmcpCmd="/usr/local/sbin/vmcp";              # the vmcp command
     dest: /usr/local/sbin/metrics.pl
     regexp: "^my \\$vmcpCmd.*"
   when: ansible_architecture != "s390x"
@@ -226,7 +226,7 @@
     name: MAILTO
     value: root
 
-- name: Create/set permission on directories: secrets, Smarty template cache, content, and install
+- name: Create/set permission on directories (secrets, Smarty template cache, content, and install)
   file:
     path: "{{ item }}"
     owner: apache

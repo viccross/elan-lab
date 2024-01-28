@@ -6,7 +6,7 @@
       #      - ansible-collection-community-general
       #      - ansible-collection-ansible-utils
       #      - ansible-collection-ansible-posix
-      - python36
+      #- python36
       - python3-magic
       - finna
     state: present
