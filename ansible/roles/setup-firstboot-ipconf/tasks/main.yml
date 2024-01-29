@@ -38,7 +38,8 @@
   register: ret
   failed_when:
     - ret.rc is defined
-    - '"already" not in ret.module_stdout'
+    - ret.rc != 0
+    - '"already" not in ret.stdout'
 
 - name: Add the fstab entry for LNXMAINT.200
   mount:
