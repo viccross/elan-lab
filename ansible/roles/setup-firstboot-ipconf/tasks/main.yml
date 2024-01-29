@@ -5,7 +5,6 @@
     state: directory
     mode: 0755
   loop:
-    - "/mnt/znetboot"
     - "/opt/ansible/tasks"
     - "/opt/ansible/inventory/group_vars"
     - "/opt/ansible/templates/named"
@@ -35,6 +34,11 @@
 - name: Bring the LNXMAINT.200 device online
   shell:
     cmd: chzdev -e 0.0.0191
+  when: ansible_architecture == "s390x"
+  register: ret
+  failed_when:
+    - ret.rc is defined
+    - '"already" not in ret.module_stdout
 
 - name: Add the fstab entry for LNXMAINT.200
   mount:
