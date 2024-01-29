@@ -38,7 +38,7 @@
   register: ret
   failed_when:
     - ret.rc is defined
-    - '"already" not in ret.module_stdout
+    - '"already" not in ret.module_stdout'
 
 - name: Add the fstab entry for LNXMAINT.200
   mount:
@@ -97,7 +97,7 @@
   - { servicename: "smapi", cmdpath: "/usr/local/sbin/checksmapi.sh", requires: "" }
   - { servicename: "zvm-ipconf", cmdpath: "/usr/local/sbin/ipconf.sh", requires: "" }
 
-- name: Ensure old systemd service files don't exist
+- name: Ensure no old systemd service files
   file:
     path: "/etc/systemd/system/{{ item.servicename }}.service"
     state: absent
