@@ -48,7 +48,6 @@
   become: true
   tasks:
   - name: Get the SSH key files
-    when: ansible_architecture != "s390x"
     block:
     - name: Slurp ssh privkey
       tags: config
@@ -68,7 +67,6 @@
   become: true
   tasks:
   - name: Put the SSH keys into the other hosts
-    when: ansible_architecture != "s390x"
     block:
     - name: Drop privkey into ssh dir
       copy:
@@ -79,8 +77,9 @@
         content: "{{ hostvars['elan_1'].elan_pubkey['content'] | b64decode }}"
         dest: ~/.ssh/id_rsa.pub
     - name: Drop public key into authorized_keys
-      copy:
-        content: "{{ hostvars['elan_1'].elan_pubkey['content'] | b64decode }}"
+      lineinfile:
+        line: "{{ hostvars['elan_1'].elan_pubkey['content'] | b64decode }}"
+        regexp: OCP-4-Admin
         dest: ~/.ssh/authorized_keys
 
 - name: Let handlers run from the previous play before starting next
