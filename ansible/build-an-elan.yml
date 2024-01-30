@@ -52,12 +52,12 @@
     - name: Slurp ssh privkey
       tags: config
       slurp:
-        src: ~/.ssh/id_rsa
+        src: ~/.ssh/id_ed25519
       register: elan_privkey
     - name: Slurp ssh pubkey
       tags: config
       slurp:
-        src: ~/.ssh/id_rsa.pub
+        src: ~/.ssh/id_ed25519.pub
       register: elan_pubkey
 
 - name: Push the SSH key file(s)
@@ -71,15 +71,15 @@
     - name: Drop privkey into ssh dir
       copy:
         content: "{{ hostvars['elan_1'].elan_privkey['content'] | b64decode }}"
-        dest: ~/.ssh/id_rsa
+        dest: ~/.ssh/id_ed25519
     - name: Drop public key into ssh dir
       copy:
         content: "{{ hostvars['elan_1'].elan_pubkey['content'] | b64decode }}"
-        dest: ~/.ssh/id_rsa.pub
+        dest: ~/.ssh/id_ed25519.pub
     - name: Drop public key into authorized_keys
       lineinfile:
         line: "{{ hostvars['elan_1'].elan_pubkey['content'] | b64decode }}"
-        regexp: OCP-4-Admin
+        regexp: ELAN-Admin
         dest: ~/.ssh/authorized_keys
 
 - name: Let handlers run from the previous play before starting next
