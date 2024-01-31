@@ -134,4 +134,3 @@
   - { src: "named/zvmesi.zone.j2", dest: "/opt/ansible/templates/named/zvmesi.zone.j2" }
   - { src: "haproxy/haproxy.cfg.j2", dest: "/opt/ansible/templates/haproxy/haproxy.cfg.j2" }
   - { src: "settings.env.j2", dest: "/etc/zvmesi/settings.env" }
-

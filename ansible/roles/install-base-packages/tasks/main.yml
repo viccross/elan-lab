@@ -82,4 +82,5 @@
       - elan-tools
       - squashfs-tools
       - fuse
+      - autofs
     state: latest
