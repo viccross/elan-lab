@@ -48,12 +48,12 @@ setall() {
 }
 
 provone() {
-	ansible-playbook -v -i ansible/inventory-zvm --limit $1 ansible/build-an-elan.yml
+	ansible-playbook -i ansible/inventory-zvm --limit $1 ansible/build-an-elan.yml
 	echo "provisioned" > .$1
 }
 
 provall() {
-	ansible-playbook -v -i ansible/inventory-zvm ansible/build-an-elan.yml
+	ansible-playbook -i ansible/inventory-zvm ansible/build-an-elan.yml
 	for num in $(seq 1 3); do
 		echo "provisioned" > .lxelan0${num}
 	done
