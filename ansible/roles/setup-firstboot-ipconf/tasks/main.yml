@@ -132,5 +132,7 @@
   - { src: "named/slavezone.conf.j2", dest: "/opt/ansible/templates/named/slavezone.conf.j2" }
   - { src: "named/subnet.in-addr.arpa.zone.j2", dest: "/opt/ansible/templates/named/subnet.in-addr.arpa.zone.j2" }
   - { src: "named/zvmesi.zone.j2", dest: "/opt/ansible/templates/named/zvmesi.zone.j2" }
+  - { src: "haproxy/cluster.cfg.j2", dest: "/opt/ansible/templates/haproxy/cluster.cfg.j2" }
   - { src: "haproxy/haproxy.cfg.j2", dest: "/opt/ansible/templates/haproxy/haproxy.cfg.j2" }
+  - { src: "haproxy/rhocp-front.cfg.j2", dest: "/opt/ansible/templates/haproxy/rhocp-front.cfg.j2" }
   - { src: "settings.env.j2", dest: "/etc/zvmesi/settings.env" }
