@@ -108,6 +108,7 @@
   - { src: guest-IPLdev-task.yml.j2, dest: /opt/ansible/roles/create-cluster/tasks/guest-IPLdev.yml }
   - { src: create-cluster-main.yml.j2, dest: /opt/ansible/roles/create-cluster/tasks/main.yml }
   - { src: create-cluster.yml.j2, dest: /opt/ansible/create-cluster.yml }
+  - { src: ocp-add-domain-dns.yml.j2, dest: /opt/ansible/ocp-add-domain-dns.yml }
   - { src: defaults/main.yml, dest: /opt/ansible/roles/create-cluster/defaults/main.yml }
   - { src: cluster-guests-create.yml.j2, dest: /opt/ansible/cluster-guests-create.yml }
   - { src: cluster-guests-delete.yml.j2, dest: /opt/ansible/cluster-guests-delete.yml }
