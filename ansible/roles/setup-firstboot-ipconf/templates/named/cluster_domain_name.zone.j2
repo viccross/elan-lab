@@ -4,7 +4,7 @@
 {% set workers = cluster_nodes['workers'] %}
 {% set bootworker = cluster_nodes['bootworker'] %}
 $TTL 900
-@                     IN SOA elan-int.{{ esigroup }}.{{ cluster_base_domain }}. hostmaster.{{ esigroup }}{{ cluster_base_domain }}. (
+@                     IN SOA elan-int.{{ esigroup }}.{{ cluster_base_domain }}. hostmaster.{{ esigroup }}.{{ cluster_base_domain }}. (
                         1 1D 1H 1W 3H
                       )
                       IN NS elan-int.{{ esigroup }}.{{ cluster_base_domain }}.

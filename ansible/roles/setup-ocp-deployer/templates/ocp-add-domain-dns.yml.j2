@@ -1,6 +1,12 @@
 ---
 - name: Reconfigure BIND DNS for the new domain name
   hosts: s390x_bastion_workstation
+  handlers:
+  - name: Restart BIND named
+    systemd:
+      name: named-chroot.service
+      state: restarted
+    listen: Restart dns
   tasks:
   - name: Create DNS Forward zone
     template:
@@ -17,7 +23,7 @@
       group: named
       mode: 0640
     vars:
-      domain_name: "{{ cluster_name }}.{{ cluster_base_domain }}"
+      domain_name: "{% raw %}{{ cluster_name }}.{{ cluster_base_domain }}{% endraw %}"
 
   - name: Add the tag for the named.conf fragment
     lineinfile:
@@ -33,7 +39,7 @@
     systemd:
       name: named-chroot.service
       state: restarted
-    listen: "Restart named"
+    listen: Restart dns
 
   - name: Update the BIND config fragments
     template:
@@ -44,4 +50,4 @@
     vars:
       domain_name: "{% raw %}{{ cluster_name }}.{{ cluster_base_domain }}{% endraw %}"
     notify:
-      - "Restart named"
+      - Restart dns
