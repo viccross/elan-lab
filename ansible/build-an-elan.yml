@@ -43,10 +43,18 @@
   - setup-icic-deployer
   - setup-finna-response
 
-- name: Grab the SSH key file(s)
+- name: Tasks for elan_1
   hosts: elan_1
   become: true
   tasks:
+  - name: Copy the pull secret
+    copy:
+      src: /home/support/.viccross-pull-secret.txt
+      dest: /var/www/html/.secret/viccross@au.ibm.com
+  - name: Copy the RHOCP content module
+    copy:
+      src: /srv/nfs/openshift-content/rhocp-install-4.14.9.esi
+      dest: /opt/content/
   - name: Get the SSH key files
     block:
     - name: Slurp ssh privkey
