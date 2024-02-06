@@ -46,14 +46,17 @@
 - name: Tasks for elan_1
   hosts: elan_1
   become: true
+  vars:
+    secret_src: '{{ "/opt/resources" if ansible_architecture == "x86_64" else "/home/support" }}'
+    content_src: '{{ "/opt/resources" if ansible_architecture == "x86_64" else "/srv/nfs/openshift-content" }}'
   tasks:
   - name: Copy the pull secret
     copy:
-      src: /home/support/.viccross-pull-secret.txt
+      src: "{{ secret_src }}/.viccross-pull-secret.txt"
       dest: /var/www/html/.secret/viccross@au.ibm.com
   - name: Copy the RHOCP content module
     copy:
-      src: /srv/nfs/openshift-content/rhocp-install-4.14.9.esi
+      src: "{{ content_src }}/rhocp-install-4.14.9.esi"
       dest: /opt/content/
   - name: Get the SSH key files
     block:
