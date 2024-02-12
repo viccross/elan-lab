@@ -26,16 +26,21 @@ backend {{ cluster_name }}-http-router
    mode http
 {% if compute is defined %}
    {% for item in compute.keys() %}
-      server {{ item }} {{ item }}.{{ cluster_domain_name }}:80 check
+   server {{ item }} {{ item }}.{{ cluster_domain_name }}:80 check
    {% endfor %}
    {% if bootcompute is defined %}
-    {% for item in bootcompute.keys() %}
-      server {{ item }} {{ item }}.{{ cluster_domain_name }}:80 check
-    {% endfor %}
+   {% for item in bootcompute.keys() %}
+   server {{ item }} {{ item }}.{{ cluster_domain_name }}:80 check
+   {% endfor %}
+   {% endif %}
+   {% if infra is defined %}
+   {% for item in infra.keys() %}
+   server {{ item }} {{ item }}.{{ cluster_domain_name }}:443 check
+   {% endfor %}
    {% endif %}
 {% else %}
-    {% for item in control.keys() %}
-      server {{ item }} {{ item }}.{{ cluster_domain_name }}:80 check
+   {% for item in control.keys() %}
+   server {{ item }} {{ item }}.{{ cluster_domain_name }}:80 check
    {% endfor %}
 {% endif %}
 
@@ -43,16 +48,21 @@ backend {{ cluster_name }}-https-router
    mode tcp
 {% if compute is defined %}
    {% for item in compute.keys() %}
-      server {{ item }} {{ item }}.{{ cluster_domain_name }}:443 check
+   server {{ item }} {{ item }}.{{ cluster_domain_name }}:443 check
    {% endfor %}
    {% if bootcompute is defined %}
-    {% for item in bootcompute.keys() %}
-      server {{ item }} {{ item }}.{{ cluster_domain_name }}:443 check
-    {% endfor %}
+   {% for item in bootcompute.keys() %}
+   server {{ item }} {{ item }}.{{ cluster_domain_name }}:443 check
+   {% endfor %}
+   {% endif %}
+   {% if infra is defined %}
+   {% for item in infra.keys() %}
+   server {{ item }} {{ item }}.{{ cluster_domain_name }}:443 check
+   {% endfor %}
    {% endif %}
 {% else %}
-    {% for item in control.keys() %}
-      server {{ item }} {{ item }}.{{ cluster_domain_name }}:443 check
+   {% for item in control.keys() %}
+   server {{ item }} {{ item }}.{{ cluster_domain_name }}:443 check
    {% endfor %}
 {% endif %}
 
