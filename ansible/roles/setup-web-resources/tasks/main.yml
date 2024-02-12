@@ -199,6 +199,7 @@
           state: directory
         loop:
           - "{{ webroot }}/.cluster"
+          - "{{ webroot }}/.clustertmp"
           - "/opt/content"
 
 - name: Install the web site RPM
@@ -276,6 +277,7 @@
     - "/opt/content"
     - "{{ webroot }}/install"
     - "{{ webroot }}/.cluster"
+    - "{{ webroot }}/.clustertmp"
 
 - name: Create and set perms on incrond trigger files
   file:
