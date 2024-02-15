@@ -117,6 +117,9 @@
   - { src: ldapIdentityCr.yml.j2, dest: /opt/ansible/roles/create-cluster/templates/ldapIdentityCr.yml.j2 }
   - { src: create-certificate.yml.j2, dest: /opt/ansible/roles/create-cluster/tasks/create-certificate.yml }
   - { src: configure-cluster.yml.j2, dest: /opt/ansible/roles/create-cluster/tasks/configure-cluster.yml }
+  - { src: create-bootfiles.yml.j2, dest: /opt/ansible/create-bootfiles.yml }
+  - { src: generate-bootfile.yml.j2, dest: /opt/ansible/create-cluster/templates/generate-bootfile.yml }
+  - { src: ocpguest.znetboot.j2, dest: /opt/ansible/create-cluster/templates/ocpguest.znetboot }
 
 #- name: Copy the DASD script
 #  template:
@@ -204,7 +207,7 @@
     mode: 0644
   notify: "Enable incrond"
 
-- name: Copy the kicker script for RHOCP define
+- name: Copy the kicker script for RHOCP action
   template:
     src: ocp-cluster-action.sh.j2
     dest: /usr/local/bin/ocp-cluster-action.sh
