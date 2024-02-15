@@ -50,6 +50,18 @@
     secret_src: '{{ "/opt/resources" if ansible_architecture == "x86_64" else "/home/support" }}'
     content_src: '{{ "/opt/resources" if ansible_architecture == "x86_64" else "/srv/nfs/openshift-content" }}'
   tasks:
+  - name: Patch z/VM IP address
+    replace:
+      regexp: '^(.*) 172.24.26.10/44444 (.*)$'
+      replace: '\1 9.33.124.40/44444 \2'
+      path: "{{ item }}"
+    loop:
+      - /opt/ansible/roles/create-cluster/tasks/boot-guest.yml
+      - /opt/ansible/roles/create-cluster/tasks/guest-IPLdev.yml
+      - /opt/ansible/roles/create-cluster/tasks/main.yml
+      - /opt/ansible/tasks/create-guest.yml
+      - /opt/ansible/tasks/delete-guest.yml
+      - /etc/zvmesi/settings.env
   - name: Copy the pull secret
     copy:
       src: "{{ secret_src }}/.viccross-pull-secret.txt"
