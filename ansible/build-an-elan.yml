@@ -62,6 +62,10 @@
       - /opt/ansible/tasks/create-guest.yml
       - /opt/ansible/tasks/delete-guest.yml
       - /etc/zvmesi/settings.env
+  - name: Start the SMAPI service
+    systemd:
+      name: smapi.service
+      state: started
   - name: Copy the pull secret
     copy:
       src: "{{ secret_src }}/.viccross-pull-secret.txt"
