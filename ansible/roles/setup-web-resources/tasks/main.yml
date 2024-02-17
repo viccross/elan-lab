@@ -178,6 +178,8 @@
       - s_index.html
       - starticic.html
       - startocp.html
+      - indexhdr.html
+      - indexftr.html
   - name: Additional setup tasks for testing
     when: elan_web_version == "ocp_redesign"
     block:
