@@ -203,7 +203,7 @@
   when: cluster['nodes']['bootcompute'] is defined
 
 - name: rename the bootstrap node for conversion # noqa 301
-  shell: smcli ichid -T {{ cluster['nodes']["bootstrap"]['bootstrap-0']['name'] }} -n {{ cluster['nodes']["bootcompute"]['compute-2']['name'] }} -H [[ ocp_smapi_host|quote ]] -U [[ ocp_smapi_user|quote ]] -P [[ ocp_smapi_password|quote ]]
+  shell: smcli ichid -T {{ cluster['nodes']["bootstrap"]['bootstrap']['name'] }} -n {{ cluster['nodes']["bootcompute"]['compute-2']['name'] }} -H [[ ocp_smapi_host|quote ]] -U [[ ocp_smapi_user|quote ]] -P [[ ocp_smapi_password|quote ]]
   when: cluster['nodes']['bootcompute'] is defined
 
 - name: make sure converted node can access the config disk
