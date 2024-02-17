@@ -1,6 +1,6 @@
 #jinja2:block_start_string:'[%', block_end_string:'%]', variable_start_string:'[[', variable_end_string:']]'
-ZNETBOOT_KERNEL=http://[[ bastion_private_ip_address ]]:8080/install/{{ cluster['OCPVer'] }}/rhcos-live-kernel-s390x
-ZNETBOOT_INITRD=http://[[ bastion_private_ip_address ]]:8080/install/{{ cluster['OCPVer'] }}/rhcos-live-initramfs.s390x.img
+ZNETBOOT_KERNEL=http://{{ bastion_public_ip_address }}:8080/install/{{ cluster['OCPVer'] }}/rhcos-live-kernel-s390x
+ZNETBOOT_INITRD=http://{{ bastion_public_ip_address }}:8080/install/{{ cluster['OCPVer'] }}/rhcos-live-initramfs.s390x.img
 ZNETBOOT_PROGRESS=2M
 
 rd.neednet=1 console=ttysclp0 coreos.inst=yes coreos.inst.install_dev=dasda

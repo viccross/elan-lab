@@ -209,7 +209,7 @@
 - name: make sure converted node can access the config disk
   shell:
     cmd: |
-      ldapmodify -Zx -h LDAPSRV.ibmpoc.internal -p 389 -D racfid=IBMAUTO,profiletype=user,o=ibmzvm -w 'jTghTGinJupD63yh' <<EOFLDIF
+      ldapmodify -Zx -h {{ zvm_ip_address }} -p 389 -D racfid=IBMAUTO,profiletype=user,o=ibmzvm -w 'jTghTGinJupD63yh' <<EOFLDIF
       dn: profilename=[[ znetboot_cfg_disk | replace(' ','.') ]],profiletype=VMMDISK,o=ibmzvm
       changetype: modify
       add: racfaccesscontrol
