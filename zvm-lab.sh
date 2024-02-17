@@ -103,11 +103,15 @@ case $1 in
 			setall CMS
 			for num in $(seq 1 3); do
 				echo "destroyed" > .lxelan0${num}
+				while ! lsvm -s lxelan0${num} >/dev/null; do sleep 2; done
+				echo "lxelan0${num} destroyed."
 			done
 		else
 			chvm -d $2
 			chvmipl -i CMS $2
 			echo "destroyed" > .$2
+			while ! lsvm -s $2 >/dev/null; do sleep 2; done
+			echo "$2 destroyed."
 		fi
 	;;
 	provision)
