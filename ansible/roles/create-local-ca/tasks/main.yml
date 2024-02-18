@@ -9,7 +9,7 @@
   openssl_csr:
     path: "{{ ca_csr_path }}/oqsCA-{{ cluster_base_domain }}.csr"
     privatekey_path: "{{ ca_key_path }}/oqsCA-{{ cluster_base_domain }}.pem"
-    common_name: "z/VM ESI Intermediate Certificate Authority"
+    common_name: "z/VM ESI ELAN Development Intermediate CA"
     use_common_name_for_san: no
     organization_name: "{{ cert_organization }}"
     organizational_unit_name: "IBM LinuxONE PoC"
