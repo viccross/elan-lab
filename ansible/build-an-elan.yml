@@ -51,6 +51,7 @@
     content_src: '{{ "/opt/resources" if ansible_architecture == "x86_64" else "/srv/nfs/openshift-content" }}'
   tasks:
   - name: Patch z/VM IP address
+    when: ansible_architecture == 's390x'
     replace:
       regexp: '^(.*) 172.24.26.10/44444 (.*)$'
       replace: '\1 9.33.124.40/44444 \2'
@@ -63,6 +64,7 @@
       - /opt/ansible/tasks/delete-guest.yml
       - /etc/zvmesi/settings.env
   - name: Start the SMAPI service
+    when: ansible_architecture == 's390x'
     systemd:
       name: smapi.service
       state: started
