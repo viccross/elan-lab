@@ -35,7 +35,7 @@ backend {{ cluster_name }}-http-router
    {% endif %}
    {% if infra is defined %}
    {% for item in infra.keys() %}
-   server {{ item }} {{ item }}.{{ cluster_domain_name }}:443 check
+   server {{ item }} {{ item }}.{{ cluster_domain_name }}:80 check
    {% endfor %}
    {% endif %}
 {% else %}
