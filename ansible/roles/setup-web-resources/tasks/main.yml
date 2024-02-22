@@ -68,7 +68,7 @@
     block: |
       SetEnv DOMAIN_NAME {{ cluster_base_domain }}
       DirectoryIndex s_index.html index.php
-      Alias /password {{ webroot }}/self-service-password-racf-ltb-project-master
+      Alias /password {{ webroot }}/self-service-password-racf-master
       Alias /ldap-sd  {{ webroot }}/service-desk-racf-master/htdocs
       <Directory "/var/www/html">
         Options Indexes FollowSymLinks Includes
@@ -303,7 +303,7 @@
 - name: Create config.inc.local.php for self-service-password
   template:
     src: self-service-password/config.inc.local.php.j2
-    dest: "{{ webroot }}/self-service-password-racf-ltb-project-master/conf/config.inc.local.php"
+    dest: "{{ webroot }}/self-service-password-racf-master/conf/config.inc.local.php"
     mode: 0644
 
 - name: Create config.inc.local.php for service-desk-racf
