@@ -68,7 +68,7 @@
     block: |
       SetEnv DOMAIN_NAME {{ cluster_base_domain }}
       DirectoryIndex s_index.html index.php
-      Alias /password {{ webroot }}/self-service-password-racf-ltb-project-master
+      Alias /password {{ webroot }}/self-service-password-racf-ltb-project-master/htdocs
       Alias /ldap-sd  {{ webroot }}/service-desk-racf-master/htdocs
       <Directory "/var/www/html">
         Options Indexes FollowSymLinks Includes
@@ -86,11 +86,11 @@
         AddDescription "<span class='ds-label'>CoreOS Installation initramfs</span>" rhcos-live-initramfs.*
         AddDescription "<span class='ds-label'>Config file for the ZNETBOOT loader</span>" .znetboot
       </Directory>
-      <Directory "{{ webroot }}/self-service-password-racf-master">
+      <Directory "{{ webroot }}/self-service-password-racf-ltb-project-master/htdocs">
         AllowOverride None
         Require all granted
       </Directory>
-      <Directory "{{ webroot }}/self-service-password-racf-master/scripts">
+      <Directory "{{ webroot }}/self-service-password-racf-ltb-project-master/rest">
         AllowOverride None
         Require all denied
       </Directory>
