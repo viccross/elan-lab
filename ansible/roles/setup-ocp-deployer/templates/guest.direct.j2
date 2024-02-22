@@ -5,4 +5,7 @@ USER {{ cluster['nodes'][coreos_role][item].name }} ZVM4DEMO {{ guestmemory[core
  CPU 00
  IPL CMS
  SHARE RELATIVE {{ guestvcpus[coreos_role] }}00
+ {% if znetboot_cfg_disk != "LNXMAINT 200" %}
+ LINK {{ znetboot_cfg_disk }} 191 RR
+ {% endif %}
  NICDEF 0600 TYPE {{ cluster['LANType'] | default('HIPERS') }} LAN SYSTEM {{ cluster['LANName'] | default('OCPLAN') }} DEVICES 3
