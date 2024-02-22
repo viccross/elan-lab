@@ -120,7 +120,7 @@
 
   - name: Download and unzip self-service-password
     unarchive:
-      src: "https://github.com/viccross/self-service-password-racf/archive/ltb-project-master.zip"
+      src: "https://github.com/viccross/self-service-password-racf/archive/master.zip"
       dest: "{{ webroot }}/"
       remote_src: yes
     environment: "{{ local_proxy_env | default(omit) }}"
