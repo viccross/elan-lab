@@ -33,12 +33,14 @@
     group: mosquitto
     backup: yes
 
-- name: Activate Grafana and Mosquitto and Loki and Promtail
-  systemd:
-    service: "{{ item }}"
-    state: enabled
-  loop:
-  - grafana-server
-  - mosquitto
-  - loki
-  - promtail-mqtt
+#- name: Activate Grafana and Mosquitto and Loki and Promtail
+#  systemd:
+#    daemon-reload: true
+#    service: "{{ item }}"
+#    state: stopped
+#    enabled: true
+#  loop:
+#  - grafana-server
+#  - mosquitto
+#  - loki
+#  - promtail-mqtt
