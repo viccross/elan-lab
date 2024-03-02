@@ -25,14 +25,13 @@
 - name: Allow traffic at port 3128
   firewalld:
     port: 3128/tcp
-    permanent: yes
+    permanent: true
+    immediate: true
     zone: "{{ item }}"
     state: enabled
   with_items:
   - internal
   - public
-  notify:
-  - Restart firewalld
 
 - name: Turn on squid_connect_any
   seboolean:
