@@ -60,3 +60,10 @@ ip_master_2: '172.24.26.5'
 ip_worker_0: '172.24.26.6'
 ip_worker_1: '172.24.26.7'
 ip_worker_2: '172.24.26.8'
+#
+mqttgate_id: mqttgate
+mqttgate_pass: mqttgate
+mqtt_promtail_id: grafanaloki01
+mqtt_promtail_pass: grafanaloki01
+mqtt_consend_id: consend01
+mqtt_consend_pass: consend01
