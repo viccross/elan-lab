@@ -99,6 +99,8 @@ case $1 in
 	;;
 	destroy)
 		if [[ -z $2 ]]; then
+			echo "Doing cleanup of defined guests"
+			ansible-playbook -i ansible/inventory-zvm ansible/cleanup-guests.yml
 			stopall
 			setall CMS
 			for num in $(seq 1 3); do
@@ -107,6 +109,10 @@ case $1 in
 				echo "lxelan0${num} destroyed."
 			done
 		else
+			if [[ $2 == "lxelan01 "]]; then
+				echo "Doing cleanup of defined guests"
+				ansible-playbook -i ansible/inventory-zvm ansible/cleanup-guests.yml
+			fi
 			chvm -d $2
 			chvmipl -i CMS $2
 			echo "destroyed" > .$2
