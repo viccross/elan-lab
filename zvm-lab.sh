@@ -109,7 +109,7 @@ case $1 in
 				echo "lxelan0${num} destroyed."
 			done
 		else
-			if [[ $2 == "lxelan01 "]]; then
+			if [[ "$2" == "lxelan01" ]]; then
 				echo "Doing cleanup of defined guests"
 				ansible-playbook -i ansible/inventory-zvm ansible/cleanup-guests.yml
 			fi
