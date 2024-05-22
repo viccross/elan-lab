@@ -1,5 +1,5 @@
 ---
-- name: Playbook to push DNS reconfiguration to remote ELANs
+- name: Playbook to push DNS and NFS reconfiguration to remote ELANs
   hosts: s390x_remote_elans
   handlers:
   - name: Restart BIND named
@@ -22,3 +22,14 @@
       - "{% raw %}{{ esigroup | lower }}{% endraw %}.zvmesi"
     notify:
       - "Restart named"
+  - name: Get the coordinator IP address
+    shell:
+      cmd: finna coord ip
+    register: coord_ip
+  - name: Add the NFS mount for ESI content
+    mount:
+      src: "{% raw %}{{ coord_ip.stdout }}{% endraw %}:/opt/content"
+      path: /opt/content
+      opts: rw,sync,hard
+      state: mounted
+      fstype: nfs
