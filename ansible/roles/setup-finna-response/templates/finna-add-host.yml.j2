@@ -8,7 +8,15 @@
     ns_zvmesi: "{{ lookup('dig', lookup('vars', 'zvmesi_domain'), qtype='NS', wantlist=true) }}"
     ns_group: "{{ lookup('dig', lookup('vars', 'group_domain'), qtype='NS', wantlist=true) }}"
     ns_hostname: "{{ sys['hostname'] }}."
-    nfs_network: "{{ ansible_facts['ansible_default_ipv4']['network'] }}/{{ ansible_facts['ansible_default_ipv4']['netmask'] }}"
+    nfs_network: "{{ ansible_default_ipv4['network'] }}/{{ ansible_default_ipv4['netmask'] }}"
+
+  handlers:
+  - name: Restart nfs-server
+    service:
+      name: nfs-server.service
+      state: restarted
+      enabled: yes
+    listen: "Restart nfs"
 
   tasks:
   - name: Read in the variable file
