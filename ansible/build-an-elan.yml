@@ -51,6 +51,12 @@
     secret_src: '{{ "/opt/resources" if ansible_architecture == "x86_64" else "/home/support" }}'
     content_src: '{{ "/opt/resources" if ansible_architecture == "x86_64" else "/srv/nfs/openshift-content" }}'
   tasks:
+  - name: Patch z/VM LDAP host
+    when: ansibe_architecture == 's390x'
+    replace:
+      regexp: '^(.*) LDAPSRV.ibmpoc.internal (.*)$'
+      replace: '\1 9.33.124.40 \2'
+      path: /usr/local/bin/icic-setup.sh
   - name: Patch z/VM IP address
     when: ansible_architecture == 's390x'
     replace:
@@ -64,6 +70,16 @@
       - /opt/ansible/tasks/create-guest.yml
       - /opt/ansible/tasks/delete-guest.yml
       - /etc/zvmesi/settings.env
+  - name: Patch z/VM guest name
+    when: ansible_architecture == 's390x'
+    replace:
+      regexp: '^(.*)LXOCPB01(.*)$'
+      replace: '\1LXELAN01\2'
+      path: "{{ item }}"
+    loop:
+      - /usr/local/bin/icic-setup.sh
+      - /usr/local/bin/icic-setup-remote.sh
+      - /usr/local/sbin/expandfs.sh
   - name: Start the SMAPI service
     when: ansible_architecture == 's390x'
     systemd:
