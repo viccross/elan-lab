@@ -9,3 +9,8 @@
     rpm_key:
       state: present
       key: "https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-{{ ansible_distribution_major_version }}"
+
+- name: Peg AlmaLinux to 8.9 due to integration issue with Ansible and EPEL
+  copy:
+    dest: /etc/dnf/vars/releasever
+    content: "8.9"
