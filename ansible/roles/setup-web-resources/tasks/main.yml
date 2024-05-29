@@ -150,22 +150,13 @@
     dest: "{{ webroot }}/w3ds"
     creates: "{{ webroot }}/w3ds/w3ds.js"
 
+- name: Install the web site RPM
+  yum:
+    name: elan-web
+    state: latest
+
 - name: Set up the site structure (s390x version)
-  when: ansible_architecture == "s390x"
   block:
-  - name: Download and unzip site structure
-    unarchive:
-      src: "/opt/resources/{{ elan_web_pkgname }}.zip"
-      dest: "{{ webroot }}/"
-      creates: "{{ webroot }}/{{ elan_web_pkgname }}/{{ meta_header_file }}"
-  - name: Move downloaded site directory # noqa no-free-form
-    shell:
-      cmd: |
-        rm -rf {{ webroot }}/{scripts,justgage,images} \
-        rm -rf {{ webroot }}/{{ elan_web_pkgname }}/{build,tests,.travis.yml} \
-        && mv {{ webroot }}/{{ elan_web_pkgname }}/* {{ webroot }}/ \
-        && rm -rf {{ webroot }}/{{ elan_web_pkgname }}
-      removes: "{{ webroot }}/{{ elan_web_pkgname }}"
   - name: Set permission on the HTML files to enable Includes
     file:
       path: "{{ webroot }}/{{ item }}"
@@ -188,7 +179,6 @@
       - indexhdr.html
       - indexftr.html
   - name: Additional setup tasks for testing
-    when: elan_web_version == "ocp_redesign"
     block:
       - name: Set permission on the additional HTML files in testing
         file:
@@ -210,12 +200,6 @@
           - "{{ webroot }}/.cluster"
           - "{{ webroot }}/.clustertmp"
           - "/opt/content"
-
-- name: Install the web site RPM
-  yum:
-    name: elan-web
-    state: latest
-  when: ansible_architecture != "s390x"
 
 - name: Symlink to the CA certificates
   block:
