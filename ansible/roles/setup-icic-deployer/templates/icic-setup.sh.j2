@@ -78,7 +78,8 @@ netconf() {
   echo "${mgtip} ${icicmgt,,}.${DOMAIN} ${icicmgt,,}" >> /mnt/sysimage/etc/hosts
   echo "${cmpip} ${iciccmp,,}.${DOMAIN} ${iciccmp,,}" >> /mnt/sysimage/etc/hosts
   # write the LDAP hostname detail to /etc/hosts
-  echo "172.24.26.10 ldapsrv.ibmpoc.internal" >> /mnt/sysimage/etc/hosts
+  ##### temporary hack here for testing -- should be 172.24.26.10
+  echo "9.33.124.40 ldapsrv.ibmpoc.internal ldapsrv" >> /mnt/sysimage/etc/hosts
   # copy the CA certificates
   cp -a /etc/pki/tls/certs/oqsRootCA.cert /mnt/sysimage/etc/pki/ca-trust/source/anchors/oqsRootCA.pem
   cp -a /etc/pki/tls/certs/oqsCA.cert /mnt/sysimage/etc/pki/ca-trust/source/anchors/oqsCA.pem
@@ -144,9 +145,11 @@ if ! ls ${icicpath}/icicimg.txt 2>/dev/null ; then
   exit 6
 fi
 
-# fetch our current IP address, and strip the netmask off the end
-myip=$(ip -br addr show dev encad0 | awk '{print $3}') # the devname in here has to be set using Ansible too
-tmpip=${myip%/*}
+## fetch our current IP address, and strip the netmask off the end
+#myip=$(ip -br addr show dev encad0 | awk '{print $3}') # the devname in here has to be set using Ansible too
+#tmpip=${myip%/*}
+# Temp workaround/hack for test lab
+tmpip=9.33.124.48
 IFS=" ";
 
 # Look for what type of space we have: if we find no "3390-" then it's FBA.
