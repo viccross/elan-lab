@@ -52,7 +52,7 @@
     content_src: '{{ "/opt/resources" if ansible_architecture == "x86_64" else "/srv/nfs/openshift-content" }}'
   tasks:
   - name: Patch z/VM LDAP host
-    when: ansibe_architecture == 's390x'
+    when: ansible_architecture == 's390x'
     replace:
       regexp: '^(.*) LDAPSRV.ibmpoc.internal (.*)$'
       replace: '\1 9.33.124.40 \2'
