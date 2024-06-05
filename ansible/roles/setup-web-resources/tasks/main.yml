@@ -199,7 +199,14 @@
         loop:
           - "{{ webroot }}/.cluster"
           - "{{ webroot }}/.clustertmp"
-          - "/opt/content"
+      - name: Create and permit the module content directory
+        file:
+          path: /opt/content
+          owner: apache
+          group: support
+          mode: 0770
+          setype: httpd_sys_rw_content_t
+          state: directory
 
 - name: Symlink to the CA certificates
   block:
@@ -267,7 +274,6 @@
   loop:
     - "{{ webroot }}/.secret"
     - "{{ webroot }}/service-desk-racf-master/templates_c"
-    - "/opt/content"
     - "{{ webroot }}/install"
     - "{{ webroot }}/.cluster"
     - "{{ webroot }}/.clustertmp"
