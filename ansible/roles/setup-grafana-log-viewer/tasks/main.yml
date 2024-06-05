@@ -73,3 +73,67 @@
     mode: 0644
     owner: grafana
     group: grafana
+
+- name: Create the simple Promtail instance configs
+  template:
+    src: promtail-cfg.yaml.j2
+    dest: /etc/loki/promtail-{{ item.job }}.yaml
+    mode: 0644
+    owner: root
+    group: root
+  loop:
+  - { job: "httpd",  path: "/var/log/httpd/*_log" }
+  - { job: "phpfpm", path: "/var/log/php-fpm/*.log" }
+  - { job: "squid",  path: "/var/log/squid/*.log" }
+
+- name: Create the sd Promtail instance configs
+  template:
+    src: promtail-cfg-sd.yaml.j2
+    dest: /etc/loki/promtail-{{ item.job }}.yaml
+    mode: 0644
+    owner: root
+    group: root
+  loop:
+  - { job: "icicbuild" }
+  - { job: "varlog" }
+
+- name: Create the JSON files for Promtail sd instances
+  template:
+    src: promtail-cfg-sd.json.j2
+    dest: /etc/loki/promtail-{{ item.job }}.json
+    mode: 0644
+    owner: root
+    group: root
+  loop:
+  - { job: "icicbuild", path: "/var/www/html/iciclog*.txt" }
+  - { job: "varlog",    path: "/var/log/*log" }
+
+- name: Create Promtail config for journald
+  copy:
+    src: promtail-cfg-journal.yaml
+    dest: /etc/loki/promtail-journal.yaml
+    mode: 0644
+    owner: root
+    group: root
+
+- name: Create systemd unit template
+  copy:
+    src: promtail.service
+    dest: /usr/local/lib/systemd/system/promtail@.service
+    mode: 0644
+    owner: root
+    group: root
+
+- name: Create and enable systemd units for Promtail
+  systemd:
+    name: promtail@{{ item }}
+    state: started
+    enabled: true
+    daemon_reload: true
+  loop:
+    - httpd
+    - icicbuild
+    - journal
+    - phpfpm
+    - squid
+    - varlog
