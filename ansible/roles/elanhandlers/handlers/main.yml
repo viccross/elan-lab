@@ -56,3 +56,7 @@
     cmd: update-ca-trust
   listen: "Update ca trust"
 
+- name: Reload systemd
+  systemd:
+    daemon_reload: true
+  listen: "Reload systemd"
