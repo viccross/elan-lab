@@ -9,7 +9,10 @@ clients:
   - url: http://localhost:3100/loki/api/v1/push
 
 scrape_configs:
-- job_name: journal
-  journal:
-    labels:
-      job: journal
+  - job_name: journal
+    journal:
+      labels:
+        job: journal
+    relabel_configs:
+      - source_labels: ['__journal__systemd_unit']
+        target_label: 'unit'

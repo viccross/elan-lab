@@ -124,6 +124,13 @@
     owner: root
     group: root
 
+- name: Define Loki port with correct SElinux type
+  seport:
+    ports: 3100
+    proto: tcp
+    setype: http_port_t
+    state: present
+
 - name: Create and enable systemd units for Promtail
   systemd:
     name: promtail@{{ item }}
