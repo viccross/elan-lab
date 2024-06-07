@@ -56,11 +56,11 @@
     cmd: update-ca-trust
   listen: "Update ca trust"
 
-- name: Reload rsyslog.service
+- name: Restart rsyslog.service
   systemd:
     name: rsyslog
-    state: reloaded
-  listen: "Reload syslog"
+    state: restarted
+  listen: "Restart syslog"
 
 - name: Reload systemd
   systemd:
