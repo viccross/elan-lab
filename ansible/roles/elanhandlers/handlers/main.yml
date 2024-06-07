@@ -59,7 +59,7 @@
 - name: Reload rsyslog.service
   systemd:
     name: rsyslog
-    state: reload
+    state: reloaded
   listen: "Reload syslog"
 
 - name: Reload systemd
