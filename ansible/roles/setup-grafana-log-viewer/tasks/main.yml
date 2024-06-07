@@ -99,22 +99,32 @@
 
 - name: Create the JSON files for Promtail sd instances
   template:
-    src: promtail-cfg-sd.json.j2
-    dest: /etc/loki/promtail-{{ item.job }}.json
+    src: promtail-cfg-sd-multi.yaml.j2
+    dest: /etc/loki/promtail-{{ item.file }}.json
     mode: 0644
     owner: root
     group: root
   loop:
-  - { job: "icicbuild", path: "/var/www/html/iciclog*.txt" }
-  - { job: "varlog",    path: "/var/log/*log" }
+    - file: "icicbuild"
+      jobs:
+        - { name: "icicbuild", path: "/var/www/html/iciclog*.txt" }
+    - file: "varlog"
+      jobs:
+        - { name: "dnflogs",   path: "/var/log/dnf*log" }
+        - { name: "hawkeylog", path: "/var/log/hawkey.log" }
+        - { name: "kdumplog",  path: "/var/log/kdump.log" }
+        - { name: "lastlog",   path: "/var/log/lastlog" }
 
-- name: Create Promtail config for journald
+- name: Create Promtail config for journald and syslog
   copy:
-    src: promtail-cfg-journal.yaml
-    dest: /etc/loki/promtail-journal.yaml
+    src: promtail-cfg-{{ item }}.yaml
+    dest: /etc/loki/promtail-{{ item }}.yaml
     mode: 0644
     owner: root
     group: root
+  loop:
+  - journal
+  - syslog
 
 - name: Create systemd unit template
   copy:
@@ -143,4 +153,33 @@
     - journal
     - phpfpm
     - squid
+    - syslog
     - varlog
+
+- name: Configure firewalld for syslog
+  firewalld:
+    service: syslog
+    state: enabled
+    permanent: true
+    immediate: true
+    zone: "{{ item }}"
+  loop:
+    - internal
+    - public
+
+- name: Configure local Rsyslog for forwarding
+  copy:
+    src: |
+      # Rsyslog config file 
+      module(load="imudp")
+
+      ruleset(name="promtail"){
+        *.* action(type="omfwd" protocol="tcp" target="127.0.0.1" port="20514" Template="RSYSLOG_SyslogProtocol23Format" TCP_Framing="octet-counted" KeepAlive="on")
+      }
+
+      input(type="imudp" port="514" ruleset="promtail")
+    dest: /etc/rsyslog.d/promtail.conf
+    mode: 0644
+    owner: root
+    group: root
+  notify: Reload syslog
