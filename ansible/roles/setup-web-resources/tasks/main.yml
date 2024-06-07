@@ -207,6 +207,7 @@
           mode: 0770
           setype: httpd_sys_rw_content_t
           state: directory
+        when: ansible_architecture == "s390x"
 
 - name: Symlink to the CA certificates
   block:

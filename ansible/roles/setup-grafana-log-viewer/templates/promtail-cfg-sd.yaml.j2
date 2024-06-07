@@ -12,4 +12,4 @@ scrape_configs:
 - job_name: "{{ item.job }}"
   file_sd_configs:
   - files:
-      - /etc/loki/promtail-{{ item.job }}.json
+      - /etc/loki/promtail-{{ item.job }}-sd.yaml

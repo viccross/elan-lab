@@ -97,10 +97,10 @@
   - { job: "icicbuild" }
   - { job: "varlog" }
 
-- name: Create the JSON files for Promtail sd instances
+- name: Create the YAML files for Promtail sd instances
   template:
     src: promtail-cfg-sd-multi.yaml.j2
-    dest: /etc/loki/promtail-{{ item.file }}.json
+    dest: /etc/loki/promtail-{{ item.file }}-sd.yaml
     mode: 0644
     owner: root
     group: root
@@ -169,7 +169,7 @@
 
 - name: Configure local Rsyslog for forwarding
   copy:
-    src: |
+    content: |
       # Rsyslog config file 
       module(load="imudp")
 
