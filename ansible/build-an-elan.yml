@@ -97,6 +97,20 @@
     copy:
       src: "{{ content_src }}/icic-1.2.1.0-fba.esi"
       dest: /opt/content/
+  - name: Create the RHEL88 repo file
+    file:
+      dest: /etc/yum.repos.d/rhel88.repo
+      content: |
+        [BaseOS]
+        name=BaseOS
+        enabled=1
+        baseurl=http://9.33.124.41:8080/install/rhel88/BaseOS
+        [AppStream]
+        name=AppStream
+        enabled=1
+        baseurl=http://9.33.124.41:8080/install/rhel88/AppStream
+      owner: root
+      mode: 0644
   - name: Get the SSH key files
     block:
     - name: Slurp ssh privkey
