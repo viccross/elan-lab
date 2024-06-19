@@ -30,7 +30,8 @@ ca_cert_path: /etc/pki/tls/certs
 ca_trust_path: /etc/pki/ca-trust/source/anchors
 #
 # OCP cluster params
-ocp_cluster_lan_name: OCPLAN
+# ocp_cluster_lan_name moved to host_vars
+#ocp_cluster_lan_name: OCPLAN
 ocp_dasd_prefix: ZVMU
 ocp_smapi_host: "{{ zvm_internal_ip_address }}/44444"
 ocp_smapi_user: IBMAUTO

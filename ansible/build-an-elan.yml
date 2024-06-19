@@ -93,6 +93,10 @@
     copy:
       src: "{{ content_src }}/rhocp-install-4.14.9.esi"
       dest: /opt/content/
+  - name: Copy the ICIC content module
+    copy:
+      src: "{{ content_src }}/icic-1.2.1.0-fba.esi"
+      dest: /opt/content/
   - name: Get the SSH key files
     block:
     - name: Slurp ssh privkey

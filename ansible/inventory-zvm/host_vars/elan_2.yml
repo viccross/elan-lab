@@ -27,6 +27,8 @@ use_cmsfs_for_znetboot_cfg: true
 #  http_proxy: http://{{ upstream_proxy_ip }}:{{ upstream_proxy_port }}
 #  https_proxy: http://{{ upstream_proxy_ip }}:{{ upstream_proxy_port }}
 #
+ocp_cluster_lan_name: ELAND2
+#
 # smapi parameters
 smapi_host: "9.33.124.40"
 smapi_user: "IBMAUTO"
