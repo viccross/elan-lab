@@ -77,3 +77,10 @@
     name: haproxy_connect_any
     state: yes
     persistent: yes
+
+- name: Start the new HAProxy instance
+  systemd:
+    name: haproxy-zvm
+    state: started
+    enabled: yes
+    daemon-reload: yes
