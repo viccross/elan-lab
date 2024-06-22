@@ -43,6 +43,8 @@
   - setup-ocp-deployer
   - setup-icic-deployer
   - setup-finna-response
+  - role: configure-lab-zvm-haproxy
+    when: ansible_architecture == "s390x"
 
 - name: Tasks for elan_1
   hosts: elan_1
