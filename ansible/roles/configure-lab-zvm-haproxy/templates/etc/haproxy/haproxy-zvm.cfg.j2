@@ -1,0 +1,78 @@
+#jinja2:block_start_string:'[%', block_end_string:'%]', variable_start_string:'[[', variable_end_string:']]'
+
+global
+  log         127.0.0.1 local2
+  chroot      /var/lib/haproxy
+  pidfile     /var/run/haproxy-zvm.pid
+  maxconn     4000
+  user        haproxy
+  group       haproxy
+  daemon
+  stats socket /var/lib/haproxy/stats-zvm
+  ssl-default-bind-ciphers PROFILE=SYSTEM
+  ssl-default-server-ciphers PROFILE=SYSTEM
+
+defaults
+  mode                    tcp
+  log                     global
+  option                  httplog
+  option                  dontlognull
+  option                  http-server-close
+  option                  redispatch
+  retries                 3
+  timeout http-request    10s
+  timeout queue           1m
+  timeout connect         10s
+  timeout client          30m
+  timeout server          30m
+  timeout http-keep-alive 10s
+  timeout check           10s
+  timeout tunnel          7500s
+  maxconn                 3000
+
+frontend zvm-ldap
+  mode tcp
+  option tcplog
+  bind {{ zvm_internal_ip_address }}:389
+  default_backend elandev1-ldap
+
+frontend zvm-th3270
+  mode tcp
+  option tcplog
+  bind {{ zvm_internal_ip_address }}:23
+  default_backend elandev1-tn3270
+
+frontend zvm-perfkit
+  mode tcp
+  option tcplog
+  bind {{ zvm_internal_ip_address }}:81
+  default_backend elandev1-perfkit
+
+frontend zvm-smapi
+  mode tcp
+  option tcplog
+  bind {{ zvm_internal_ip_address }}:44444
+  default_backend elandev1-smapi
+
+backend elandev1-ldap
+  mode tcp
+  server elandev1 9.33.124.40:389 check
+
+backend elandev1-tn3270
+  mode tcp
+  server elandev1 9.33.124.40:23 check
+
+backend elandev1-perfkit
+  mode tcp
+  server elandev1 9.33.124.40:81 check
+
+backend elandev1-smapi
+  mode tcp
+  server elandev1 9.33.124.40:44444 check
+
+frontend stats
+  bind *:8405 ssl crt /etc/haproxy/haproxy-combined.pem
+  stats enable
+  stats uri /stats
+  stats refresh 10s
+  stats admin if LOCALHOST

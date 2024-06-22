@@ -1,0 +1,86 @@
+---
+# tasks file for configure-haproxy
+- name: Install haproxy
+  yum:
+    name:
+      - haproxy
+      - python3-libsemanage
+    state: present
+
+- name: Create HAProxy service script
+  copy:
+    dest: /usr/local/lib/systemd/system/haproxy-zvm.service
+    content: |
+      [Unit]
+      Description=HAProxy Load Balancer for z/VM services
+      After=network-online.target
+      Wants=network-online.target
+
+      [Service]
+      Environment="CONFIG=/etc/haproxy/haproxy-zvm.cfg" "PIDFILE=/run/haproxy-zvm.pid"
+      EnvironmentFile=/etc/sysconfig/haproxy
+      ExecStartPre=/bin/bash -c 'ip addr add {{ zvm_internal_ip_address }}/24 dev {{ guest_internal_nicid }}' && /usr/sbin/haproxy -f $CONFIG -c -q
+      ExecStart=/usr/sbin/haproxy -Ws -f $CONFIG -p $PIDFILE $OPTIONS
+      ExecReload=/usr/sbin/haproxy -f $CONFIG -c -q $OPTIONS
+      ExecReload=/bin/kill -USR2 $MAINPID
+      ExecStopPost=/bin/bash -c 'ip addr del {{ zvm_internal_ip_address }}/24 dev {{ guest_internal_nicid }}'
+      SuccessExitStatus=143
+      KillMode=mixed
+      Type=notify
+
+      [Install]
+      WantedBy=multi-user.target 
+    owner: root
+    mode: 0644
+
+- name: Allow traffic at 8405 for haproxy stats
+  tags: firewall
+  firewalld:
+    port: 8405/tcp
+    zone: "{{ item }}"
+    state: enabled
+    immediate: true
+    permanent: true
+  with_items:
+  - internal
+  - public
+
+- name: Allow firewall ports traffic
+  firewalld:
+    port: "{{ item }}"
+    permanent: true
+    immediate: true
+    zone: internal
+    state: enabled
+  loop:
+  - 23/tcp
+  - 81/tcp
+  - 389/tcp
+  - 44444/tcp
+
+- name: Create /etc/haproxy
+  file:
+    path: /etc/haproxy
+    state: directory
+    group: haproxy
+    mode: 0755
+
+- name: Create /etc/haproxy/haproxy-zvm.cfg
+  template:
+    src: etc/haproxy/haproxy-zvm.cfg.j2
+    dest: /etc/haproxy/haproxy.cfg
+    group: haproxy
+    mode: 0644
+
+- name: Turn on haproxy_connect_any
+  seboolean:
+    name: haproxy_connect_any
+    state: yes
+    persistent: yes
+
+- name: Start the new HAProxy instance
+  systemd:
+    name: haproxy-zvm
+    state: started
+    enabled: yes
+    daemon-reload: yes
