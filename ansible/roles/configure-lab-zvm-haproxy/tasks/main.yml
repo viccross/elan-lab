@@ -68,7 +68,7 @@
 - name: Create /etc/haproxy/haproxy-zvm.cfg
   template:
     src: etc/haproxy/haproxy-zvm.cfg.j2
-    dest: /etc/haproxy/haproxy.cfg
+    dest: /etc/haproxy/haproxy-zvm.cfg
     group: haproxy
     mode: 0644
 
