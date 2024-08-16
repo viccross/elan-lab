@@ -34,6 +34,14 @@
     group: mosquitto
     backup: yes
 
+- name: Configure Grafana
+  template:
+    src: grafana.ini.j2
+    dest: /etc/grafana/grafana.ini
+    mode: 0644
+    owner: grafana
+    group: grafana
+
 - name: Create provisioning file for Loki datasource
   copy:
     dest: /etc/grafana/provisioning/datasources/default.yaml
