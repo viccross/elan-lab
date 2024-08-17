@@ -100,6 +100,7 @@
       src: "{{ content_src }}/icic-1.2.1.0-fba.esi"
       dest: /opt/content/
   - name: Create the RHEL88 repo file
+    when: ansible_architecture == "s390x"
     copy:
       dest: /etc/yum.repos.d/rhel88.repo
       content: |
