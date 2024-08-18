@@ -80,7 +80,7 @@ Vagrant.configure("2") do |config|
         domain.machine_virtual_size = 20
         domain.memory = 4096
       end
-      node.vm.hostname = "lxelan0#{i}.vic.lab"
+      node.vm.hostname = "lxelan0#{i}.testgrp.vic.lab"
       node.vm.network :private_network,
         :libvirt__network_name => "default",
         :libvirt__always_destroy => false,
