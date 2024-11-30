@@ -40,6 +40,7 @@
   - configure-cockpit
     #  - configure-ignition
   - setup-grafana-log-viewer
+  - setup-data-pump
   - setup-ocp-deployer
   - setup-icic-deployer
   - setup-finna-response
@@ -126,6 +127,10 @@
       slurp:
         src: ~/.ssh/id_ed25519.pub
       register: elan_pubkey
+  - name: Start InfluxDB
+    ansible.builtin.systemd:
+      name: container-vmprf
+      state: started
 
 - name: Push the SSH key file(s)
   hosts:
