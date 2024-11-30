@@ -130,7 +130,7 @@
       register: elan_pubkey
   - name: Start InfluxDB
     ansible.builtin.systemd:
-      name: container-vmprf
+      name: pod-vmprf
       state: started
 
 - name: Push the SSH key file(s)
