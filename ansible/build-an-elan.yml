@@ -52,7 +52,8 @@
   become: true
   vars:
     secret_src: '{{ "/opt/resources" if ansible_architecture == "x86_64" else "/home/support" }}'
-    content_src: '{{ "/opt/resources" if ansible_architecture == "x86_64" else "/srv/nfs/openshift-content" }}'
+#    content_src: '{{ "/opt/resources" if ansible_architecture == "x86_64" else "/srv/nfs/openshift-content" }}'
+    content_src: /opt/resources
   tasks:
   - name: Patch z/VM LDAP host
     when: ansible_architecture == 's390x'
