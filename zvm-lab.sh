@@ -31,7 +31,7 @@ startall() {
 }
 
 stopall() {
-	for num in $(seq 1 3); do
+	for num in $(seq 3 -1 1); do
 		chvm -d lxelan0${num}
 		sleep 1
 	done
