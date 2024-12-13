@@ -55,19 +55,19 @@ frontend zvm-smapi
 
 backend elandev1-ldap
   mode tcp
-  server elandev1 9.33.124.40:389 check
+  server elandev1 9.33.124.40:389
 
 backend elandev1-tn3270
   mode tcp
-  server elandev1 9.33.124.40:23 check
+  server elandev1 9.33.124.40:23
 
 backend elandev1-perfkit
   mode tcp
-  server elandev1 9.33.124.40:81 check
+  server elandev1 9.33.124.40:81
 
 backend elandev1-smapi
   mode tcp
-  server elandev1 9.33.124.40:44444 check
+  server elandev1 9.33.124.40:44444
 
 frontend stats
   bind *:8405 ssl crt /etc/haproxy/haproxy-combined.pem
