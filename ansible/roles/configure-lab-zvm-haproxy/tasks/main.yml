@@ -1,14 +1,14 @@
 ---
 # tasks file for configure-haproxy
 - name: Install haproxy
-  yum:
+  ansible.builtin.yum:
     name:
       - haproxy
       - python3-libsemanage
     state: present
 
 - name: Create HAProxy service script
-  copy:
+  ansible.builtin.copy:
     dest: /usr/local/lib/systemd/system/haproxy-zvm.service
     content: |
       [Unit]
@@ -29,7 +29,7 @@
       Type=notify
 
       [Install]
-      WantedBy=multi-user.target 
+      WantedBy=multi-user.target
     owner: root
     mode: 0644
 
@@ -42,8 +42,8 @@
     immediate: true
     permanent: true
   with_items:
-  - internal
-  - public
+    - internal
+    - public
 
 - name: Allow firewall ports traffic
   firewalld:
@@ -53,20 +53,20 @@
     zone: internal
     state: enabled
   loop:
-  - 23/tcp
-  - 81/tcp
-  - 389/tcp
-  - 44444/tcp
+    - 23/tcp
+    - 81/tcp
+    - 389/tcp
+    - 44444/tcp
 
 - name: Create /etc/haproxy
-  file:
+  ansible.builtin.file:
     path: /etc/haproxy
     state: directory
     group: haproxy
     mode: 0755
 
 - name: Create /etc/haproxy/haproxy-zvm.cfg
-  template:
+  ansible.builtin.template:
     src: etc/haproxy/haproxy-zvm.cfg.j2
     dest: /etc/haproxy/haproxy-zvm.cfg
     group: haproxy
@@ -79,7 +79,7 @@
     persistent: yes
 
 - name: Start the new HAProxy instance
-  systemd:
+  ansible.builtin.systemd:
     name: haproxy-zvm
     state: started
     enabled: yes

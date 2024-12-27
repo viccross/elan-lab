@@ -10,7 +10,7 @@
     state: present
 
 - name: Create configuration for our external non-SSL VirtualHost
-  blockinfile:
+  ansible.builtin.blockinfile:
     dest: /etc/httpd/conf.d/nonssl.conf
     create: yes
     mode: "0644"
@@ -34,7 +34,7 @@
           AddDescription "<span class='ds-label'>CoreOS Installation initramfs</span>" rhcos-live-initramfs.*
         </Directory>
         <Directory "/var/www/html/bootfiles">
-          Options +Indexes +FollowSymLinks 
+          Options +Indexes +FollowSymLinks
           Require all granted
           SetEnvIf Request_URI "^/(?:(.+)/)?$" DIRECTORY_NAME=/$1
           <FilesMatch "index.php">
@@ -62,7 +62,7 @@
       </VirtualHost>
 
 - name: Add the Apache configuration for the tools
-  blockinfile:
+  ansible.builtin.blockinfile:
     dest: /etc/httpd/conf.d/ssl.conf
     insertbefore: "</VirtualHost>"
     block: |
@@ -128,27 +128,27 @@
 #    environment: "{{ local_proxy_env | default(omit) }}"
 
   - name: Download and unzip self-service-password
-    unarchive:
+    ansible.builtin.unarchive:
       src: "https://github.com/viccross/self-service-password-racf/archive/master.zip"
       dest: "{{ webroot }}/"
       remote_src: yes
     environment: "{{ local_proxy_env | default(omit) }}"
 
   - name: Download and unzip service-desk
-    unarchive:
+    ansible.builtin.unarchive:
       src: "https://github.com/viccross/service-desk-racf/archive/master.zip"
       dest: "{{ webroot }}/"
       remote_src: yes
     environment: "{{ local_proxy_env | default(omit) }}"
 
 - name: Make w3ds directory
-  file:
+  ansible.builtin.file:
     path: "{{ webroot }}/w3ds"
     state: directory
     mode: 0755
 
 - name: Download and unzip w3DS
-  unarchive:
+  ansible.builtin.unarchive:
     src: "/opt/resources/w3ds-6.2.4.zip"
     dest: "{{ webroot }}/w3ds"
     creates: "{{ webroot }}/w3ds/w3ds.js"
@@ -161,7 +161,7 @@
 - name: Set up the site structure (s390x version)
   block:
   - name: Set permission on the HTML files to enable Includes
-    file:
+    ansible.builtin.file:
       path: "{{ webroot }}/{{ item }}"
       owner: root
       group: apache
@@ -184,7 +184,7 @@
   - name: Additional setup tasks for testing
     block:
       - name: Set permission on the additional HTML files in testing
-        file:
+        ansible.builtin.file:
           path: "{{ webroot }}/{{ item }}"
           owner: root
           group: apache
@@ -192,7 +192,7 @@
         loop:
           - "filecreds.html"
       - name: Create directories for work files
-        file:
+        ansible.builtin.file:
           path: "{{ item }}"
           owner: apache
           group: root
@@ -203,7 +203,7 @@
           - "{{ webroot }}/.cluster"
           - "{{ webroot }}/.clustertmp"
       - name: Create and permit the module content directory
-        file:
+        ansible.builtin.file:
           path: /opt/content
           owner: apache
           group: support
@@ -215,42 +215,42 @@
 - name: Symlink to the CA certificates
   block:
   - name: Symlink to the bundle
-    file:
+    ansible.builtin.file:
       src: "/etc/pki/tls/certs/oqsCA.certs.bundle"
       dest: "{{ webroot }}/ESICABundle.pem"
       state: link
   - name: Symlink to the Root CA cert
-    file:
+    ansible.builtin.file:
       src: "/etc/pki/tls/certs/oqsRootCA.cert"
       dest: "{{ webroot }}/ESIRootCA.pem"
       state: link
   - name: Symlink to the Intermediate CA cert
-    file:
+    ansible.builtin.file:
       src: "/etc/pki/tls/certs/oqsCA.cert"
       dest: "{{ webroot }}/ESICA.pem"
       state: link
 
 - name: Install the basic stats script to local executable path
-  shell:
+  ansible.builtin.shell:
     cmd: "mv {{ webroot }}/scripts/metrics.pl /usr/local/sbin/ && rmdir {{ webroot }}/scripts"
     removes: "{{ webroot }}/scripts"
   when: ansible_architecture == "s390x"
 
 - name: Patch the basic stats script, if needed
-  lineinfile:
+  ansible.builtin.lineinfile:
     line: my $vmcpCmd="/usr/local/sbin/vmcp";              # the vmcp command
     dest: /usr/local/sbin/metrics.pl
     regexp: "^my \\$vmcpCmd.*"
   when: ansible_architecture != "s390x"
 
 - name: Set permission on metrics.pl
-  file:
+  ansible.builtin.file:
     path: /usr/local/sbin/metrics.pl
     owner: root
     mode: 0750
 
 - name: Enable running metrics script via cron
-  cron:
+  ansible.builtin.cron:
     name: Run metrics.pl
     user: root
     job: "/usr/local/sbin/metrics.pl"
@@ -269,7 +269,7 @@
     value: root
 
 - name: Create/set permission on directories (secrets, Smarty template cache, content, and install)
-  file:
+  ansible.builtin.file:
     path: "{{ item }}"
     owner: apache
     mode: 0750
@@ -283,7 +283,7 @@
     - "{{ webroot }}/.clustertmp"
 
 - name: Create and set perms on incrond trigger files
-  file:
+  ansible.builtin.file:
     path: "{{ webroot }}/.secret/{{ item }}"
     owner: apache
     group: root
@@ -301,19 +301,19 @@
 #      line: define("SMARTY", "/usr/share/php/Smarty/Smarty.class.php");
 
 - name: Create config.inc.local.php for self-service-password
-  template:
+  ansible.builtin.template:
     src: self-service-password/config.inc.local.php.j2
     dest: "{{ webroot }}/self-service-password-racf-master/conf/config.inc.local.php"
     mode: 0644
 
 - name: Create config.inc.local.php for service-desk-racf
-  template:
+  ansible.builtin.template:
     src: service-desk-racf/config.inc.local.php.j2
     dest: "{{ webroot }}/service-desk-racf-master/conf/config.inc.local.php"
     mode: 0644
 
 - name: Prime the ocp-version file with 'default' version
-  copy:
+  ansible.builtin.copy:
     content: "4.8"
     dest: "{{ webroot }}/ocp-version"
     owner: apache
@@ -324,12 +324,12 @@
 - name: Patch php.ini for uploads
   block:
   - name: Patch post_max_size
-    lineinfile:
+    ansible.builtin.lineinfile:
       dest: /etc/php.ini
       regex: ^post_max_size
       line: post_max_size = 0
   - name: Patch upload_max_filesize
-    lineinfile:
+    ansible.builtin.lineinfile:
       dest: /etc/php.ini
       regex: ^upload_max_filesize
       line: upload_max_filesize = 0
@@ -347,13 +347,13 @@
     persistent: yes
 
 - name: Restart httpd
-  service:
+  ansible.builtin.service:
     name: httpd.service
     state: restarted
     enabled: yes
 
 - name: Restart php-fpm
-  service:
+  ansible.builtin.service:
     name: php-fpm.service
     state: restarted
     enabled: yes

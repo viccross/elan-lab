@@ -1,22 +1,22 @@
 ---
 # tasks file for configure-squid
 - name: Install squid
-  yum:
+  ansible.builtin.yum:
     name:
       - squid
     state: present
   notify:
-  - Restart squid
+    - Restart squid
 
 - name: Create /etc/squid
-  file:
+  ansible.builtin.file:
     path: /etc/squid
     state: directory
     group: squid
     mode: 0755
 
 - name: Create /etc/squid/squid.conf
-  template:
+  ansible.builtin.template:
     src: etc/squid/squid.conf.j2
     dest: /etc/squid/squid.conf
     group: squid
@@ -30,12 +30,11 @@
     zone: "{{ item }}"
     state: enabled
   with_items:
-  - internal
-  - public
+    - internal
+    - public
 
 - name: Turn on squid_connect_any
   seboolean:
     name: squid_connect_any
     state: yes
     persistent: yes
-
