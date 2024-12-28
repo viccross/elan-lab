@@ -1,7 +1,7 @@
 ---
 # tasks file for configure-squid
 - name: Install squid
-  ansible.builtin.yum:
+  ansible.builtin.dnf:
     name:
       - squid
     state: present
@@ -36,5 +36,5 @@
 - name: Turn on squid_connect_any
   seboolean:
     name: squid_connect_any
-    state: yes
-    persistent: yes
+    state: true
+    persistent: true

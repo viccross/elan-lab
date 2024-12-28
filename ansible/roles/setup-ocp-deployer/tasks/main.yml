@@ -1,6 +1,6 @@
 ---
 - name: Install some dependencies
-  yum:
+  ansible.builtin.dnf:
     name:
       #      - ansible
       #      - ansible-collection-community-general
@@ -90,6 +90,9 @@
     dest: ~/.ssh/authorized_keys
     state: present
     create: true
+    owner: root
+    group: root
+    mode: 0600
 
 - name: Make ~/.kube directory
   ansible.builtin.file:

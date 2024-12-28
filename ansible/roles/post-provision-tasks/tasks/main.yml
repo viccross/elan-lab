@@ -1,5 +1,5 @@
 ---
-- name: Install the "Ansible-OpenShift-Provisioning" repo
+- name: Install the "Ansible-OpenShift-Provisioning" repo # noqa latest
   ansible.builtin.git:
     repo: https://github.com/IBM/Ansible-OpenShift-Provisioning.git
     dest: /opt/ansible/OpenShift-KVM

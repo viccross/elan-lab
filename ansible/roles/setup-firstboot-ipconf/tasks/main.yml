@@ -31,7 +31,7 @@
       cmsfs-fuse -a $@
   when: ansible_architecture == "s390x"
 
-- name: Bring the LNXMAINT.200 device online # noqa no-changed-when command_instead_of_shell
+- name: Bring the LNXMAINT.200 device online # noqa no-changed-when command-instead-of-shell
   ansible.builtin.shell:
     cmd: chzdev -e 0.0.0191
   when: ansible_architecture == "s390x"
@@ -71,7 +71,7 @@
   when: ansible_architecture == "s390x"
 
 - name: Install tools (dependencies of ipconf.sh and LDAPSRVcert)
-  yum:
+  ansible.builtin.dnf:
     name: "{{ item }}"
     state: present
   loop:
@@ -108,7 +108,7 @@
     name: "{{ item.servicename }}"
     daemon_reload: true
     state: stopped
-    enabled: yes
+    enabled: true
   loop:
     - { servicename: "zvm-ipconf" }
 

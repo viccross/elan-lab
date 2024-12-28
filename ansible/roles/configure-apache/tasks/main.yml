@@ -1,6 +1,6 @@
 ---
 - name: Install apache httpd
-  ansible.builtin.yum:
+  ansible.builtin.dnf:
     name:
       - httpd
       - mod_ssl
@@ -30,7 +30,7 @@
     ownca_privatekey_path: /etc/pki/tls/private/oqsCA.pem
     ownca_not_after: +397d
     provider: ownca
-    force: yes
+    force: true
 
 - name: Bind httpd to port 8080
   ansible.builtin.lineinfile:

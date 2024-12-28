@@ -10,7 +10,7 @@
 - name: Install EPEL repository
   block:
     - name: Install EPEL RPM
-      ansible.builtin.yum:
+      ansible.builtin.dnf:
         name: https://dl.fedoraproject.org/pub/epel/epel-release-latest-{{ ansible_distribution_major_version }}.noarch.rpm
         state: present
       environment: "{{ local_proxy_env | default(omit) }}"
@@ -25,29 +25,32 @@
       when: local_proxy_env is defined
 
 - name: Install nfs-utils
-  ansible.builtin.yum:
+  ansible.builtin.dnf:
     name: nfs-utils
     state: present
 
 - name: Set up local NFS in Vic's testlab
   when: ansible_architecture != "s390x"
   block:
-  - name: Create the directory for mounting the repodir
-    ansible.builtin.file:
-      path: /srv/repodir
-      state: directory
-  - name: Mount the dnf-local NFS directory
-    mount:
-      src: 192.168.124.1:/srv/ml2/dnf-local
-      path: /srv/repodir
-      opts: rw,sync,hard
-      state: mounted
-      fstype: nfs
+    - name: Create the directory for mounting the repodir
+      ansible.builtin.file:
+        path: /srv/repodir
+        state: directory
+        owner: root
+        group: root
+        mode: 0755
+    - name: Mount the dnf-local NFS directory
+      mount:
+        src: 192.168.124.1:/srv/ml2/dnf-local
+        path: /srv/repodir
+        opts: rw,sync,hard
+        state: mounted
+        fstype: nfs
 
 # - name: Install and configure dnf-local-plugin
 #   block:
 #   - name: Add the plugin
-#     yum:
+#     ansible.builtin.dnf:
 #       name: python3-dnf-plugin-local
 #       state: present
 #   - name: Configure the plugin
@@ -64,8 +67,8 @@
     gpgcheck: no
     sslverify: no
 
-- name: Install base prerequisites
-  ansible.builtin.yum:
+- name: Install base prerequisites # noqa package-latest
+  ansible.builtin.dnf:
     name:
       - ansible
       - unzip

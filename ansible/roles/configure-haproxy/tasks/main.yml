@@ -1,7 +1,7 @@
 ---
 # tasks file for configure-haproxy
 - name: Install haproxy
-  ansible.builtin.yum:
+  ansible.builtin.dnf:
     name:
       - haproxy
       - python3-libsemanage
@@ -39,7 +39,7 @@
         ownca_privatekey_path: /etc/pki/tls/private/oqsCA.pem
         ownca_not_after: +397d
         provider: ownca
-        force: yes
+        force: true
 
     - name: Create combined PEM file for HAProxy # noqa no-changed-when
       ansible.builtin.shell:
@@ -126,5 +126,5 @@
 - name: Turn on haproxy_connect_any
   ansible.posix.seboolean:
     name: haproxy_connect_any
-    state: yes
-    persistent: yes
+    state: true
+    persistent: true

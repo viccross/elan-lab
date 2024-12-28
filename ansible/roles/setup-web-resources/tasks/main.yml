@@ -1,6 +1,6 @@
 ---
 - name: Install php and requisites
-  yum:
+  ansible.builtin.dnf:
     name:
       - php
       - php-json
@@ -126,20 +126,18 @@
 #      creates: "/usr/local/bin/smarty-3.1.48/"
 #      remote_src: yes
 #    environment: "{{ local_proxy_env | default(omit) }}"
-
-  - name: Download and unzip self-service-password
-    ansible.builtin.unarchive:
-      src: "https://github.com/viccross/self-service-password-racf/archive/master.zip"
-      dest: "{{ webroot }}/"
-      remote_src: yes
-    environment: "{{ local_proxy_env | default(omit) }}"
-
-  - name: Download and unzip service-desk
-    ansible.builtin.unarchive:
-      src: "https://github.com/viccross/service-desk-racf/archive/master.zip"
-      dest: "{{ webroot }}/"
-      remote_src: yes
-    environment: "{{ local_proxy_env | default(omit) }}"
+    - name: Download and unzip self-service-password
+      ansible.builtin.unarchive:
+        src: "https://github.com/viccross/self-service-password-racf/archive/master.zip"
+        dest: "{{ webroot }}/"
+        remote_src: yes
+      environment: "{{ local_proxy_env | default(omit) }}"
+    - name: Download and unzip service-desk
+      ansible.builtin.unarchive:
+        src: "https://github.com/viccross/service-desk-racf/archive/master.zip"
+        dest: "{{ webroot }}/"
+        remote_src: yes
+      environment: "{{ local_proxy_env | default(omit) }}"
 
 - name: Make w3ds directory
   ansible.builtin.file:
@@ -153,82 +151,82 @@
     dest: "{{ webroot }}/w3ds"
     creates: "{{ webroot }}/w3ds/w3ds.js"
 
-- name: Install the web site RPM
-  yum:
+- name: Install the web site RPM # noqa package-latest
+  ansible.builtin.dnf:
     name: elan-web
     state: latest
 
 - name: Set up the site structure (s390x version)
   block:
-  - name: Set permission on the HTML files to enable Includes
-    ansible.builtin.file:
-      path: "{{ webroot }}/{{ item }}"
-      owner: root
-      group: apache
-      mode: 0750
-    loop:
-      - ocp-cockpit.html
-      - ocp-console.html
-      - ocp-haproxy.html
-      - ocp-perfkit.html
-      - dashboard.html
-      - metrics.html
-      - gethelp.html
-      - index.html
-      - s_header.html
-      - s_index.html
-      - starticic.html
-      - startocp.html
-      - indexhdr.html
-      - indexftr.html
-  - name: Additional setup tasks for testing
-    block:
-      - name: Set permission on the additional HTML files in testing
-        ansible.builtin.file:
-          path: "{{ webroot }}/{{ item }}"
-          owner: root
-          group: apache
-          mode: 0750
-        loop:
-          - "filecreds.html"
-      - name: Create directories for work files
-        ansible.builtin.file:
-          path: "{{ item }}"
-          owner: apache
-          group: root
-          mode: 0750
-          setype: httpd_sys_rw_content_t
-          state: directory
-        loop:
-          - "{{ webroot }}/.cluster"
-          - "{{ webroot }}/.clustertmp"
-      - name: Create and permit the module content directory
-        ansible.builtin.file:
-          path: /opt/content
-          owner: apache
-          group: support
-          mode: 0770
-          setype: httpd_sys_rw_content_t
-          state: directory
-        when: ansible_architecture == "s390x"
+    - name: Set permission on the HTML files to enable Includes
+      ansible.builtin.file:
+        path: "{{ webroot }}/{{ item }}"
+        owner: root
+        group: apache
+        mode: 0750
+      loop:
+        - ocp-cockpit.html
+        - ocp-console.html
+        - ocp-haproxy.html
+        - ocp-perfkit.html
+        - dashboard.html
+        - metrics.html
+        - gethelp.html
+        - index.html
+        - s_header.html
+        - s_index.html
+        - starticic.html
+        - startocp.html
+        - indexhdr.html
+        - indexftr.html
+    - name: Additional setup tasks for testing
+      block:
+        - name: Set permission on the additional HTML files in testing
+          ansible.builtin.file:
+            path: "{{ webroot }}/{{ item }}"
+            owner: root
+            group: apache
+            mode: 0750
+          loop:
+            - "filecreds.html"
+        - name: Create directories for work files
+          ansible.builtin.file:
+            path: "{{ item }}"
+            owner: apache
+            group: root
+            mode: 0750
+            setype: httpd_sys_rw_content_t
+            state: directory
+          loop:
+            - "{{ webroot }}/.cluster"
+            - "{{ webroot }}/.clustertmp"
+        - name: Create and permit the module content directory
+          ansible.builtin.file:
+            path: /opt/content
+            owner: apache
+            group: support
+            mode: 0770
+            setype: httpd_sys_rw_content_t
+            state: directory
+          when: ansible_architecture == "s390x"
 
 - name: Symlink to the CA certificates
   block:
-  - name: Symlink to the bundle
-    ansible.builtin.file:
-      src: "/etc/pki/tls/certs/oqsCA.certs.bundle"
-      dest: "{{ webroot }}/ESICABundle.pem"
-      state: link
-  - name: Symlink to the Root CA cert
-    ansible.builtin.file:
-      src: "/etc/pki/tls/certs/oqsRootCA.cert"
-      dest: "{{ webroot }}/ESIRootCA.pem"
-      state: link
-  - name: Symlink to the Intermediate CA cert
-    ansible.builtin.file:
-      src: "/etc/pki/tls/certs/oqsCA.cert"
-      dest: "{{ webroot }}/ESICA.pem"
-      state: link
+    - name: Symlink to the bundle
+      ansible.builtin.file:
+        src: "/etc/pki/tls/certs/oqsCA.certs.bundle"
+        dest: "{{ webroot }}/ESICABundle.pem"
+        state: link
+    - name: Symlink to the Root CA cert
+      ansible.builtin.file:
+        src: "/etc/pki/tls/certs/oqsRootCA.cert"
+        dest: "{{ webroot }}/ESIRootCA.pem"
+        state: link
+    - name: Symlink to the Intermediate CA cert
+      ansible.builtin.file:
+        src: "/etc/pki/tls/certs/oqsCA.cert"
+        dest: "{{ webroot }}/ESICA.pem"
+        state: link
 
 - name: Install the basic stats script to local executable path
   ansible.builtin.shell:
@@ -323,16 +321,16 @@
 
 - name: Patch php.ini for uploads
   block:
-  - name: Patch post_max_size
-    ansible.builtin.lineinfile:
-      dest: /etc/php.ini
-      regex: ^post_max_size
-      line: post_max_size = 0
-  - name: Patch upload_max_filesize
-    ansible.builtin.lineinfile:
-      dest: /etc/php.ini
-      regex: ^upload_max_filesize
-      line: upload_max_filesize = 0
+    - name: Patch post_max_size
+      ansible.builtin.lineinfile:
+        dest: /etc/php.ini
+        regex: ^post_max_size
+        line: post_max_size = 0
+    - name: Patch upload_max_filesize
+      ansible.builtin.lineinfile:
+        dest: /etc/php.ini
+        regex: ^upload_max_filesize
+        line: upload_max_filesize = 0
 
 - name: Permit SELinux access to network from Apache (for reverse proxy)
   seboolean:

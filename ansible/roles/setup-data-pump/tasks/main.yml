@@ -118,7 +118,7 @@
     mode: 0644
     owner: root
     group: root
-    
+
 - name: Configure InfluxDB
   ansible.builtin.copy:
     dest: /etc/vmprf/influxdb/influxdb.conf

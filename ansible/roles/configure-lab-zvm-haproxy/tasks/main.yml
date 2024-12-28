@@ -1,7 +1,7 @@
 ---
 # tasks file for configure-haproxy
 - name: Install haproxy
-  ansible.builtin.yum:
+  ansible.builtin.dnf:
     name:
       - haproxy
       - python3-libsemanage
@@ -75,12 +75,12 @@
 - name: Turn on haproxy_connect_any
   seboolean:
     name: haproxy_connect_any
-    state: yes
-    persistent: yes
+    state: true
+    persistent: true
 
 - name: Start the new HAProxy instance
   ansible.builtin.systemd:
     name: haproxy-zvm
     state: started
-    enabled: yes
-    daemon-reload: yes
+    enabled: true
+    daemon-reload: true

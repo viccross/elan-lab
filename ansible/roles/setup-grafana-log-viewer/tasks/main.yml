@@ -196,7 +196,7 @@
     - internal
     - public
 
-- name: Configure local Rsyslog for forwarding
+- name: Configure local Rsyslog for forwarding # noqa line-length
   ansible.builtin.copy:
     content: |
       # Rsyslog config file

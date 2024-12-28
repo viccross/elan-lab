@@ -3,14 +3,14 @@
   hosts: elan_1
   become: true
   tasks:
-  - name: Find the names of defined clusters
-    find:
-      paths: /var/www/html/.cluster/
-    register: clusters
-  
-  - name: Run the remote task for each cluster
-    shell:
-      cmd: ansible-playbook -i inventory -e "cluster_name={{ item.path | basename}}" -e "@{{ item.path }}" cluster-guests-delete.yml
-    args:
-      chdir: /opt/ansible
-    loop: "{{ clusters.files }}"
+    - name: Find the names of defined clusters
+      ansible.builtin.find:
+        paths: /var/www/html/.cluster/
+      register: clusters
+
+    - name: Run the remote task for each cluster # noqa command-instead-of-shell no-changed-when
+      ansible.builtin.shell:
+        cmd: ansible-playbook -i inventory -e "cluster_name={{ item.path | basename }}" -e "@{{ item.path }}" cluster-guests-delete.yml
+      args:
+        chdir: /opt/ansible
+      loop: "{{ clusters.files }}"
