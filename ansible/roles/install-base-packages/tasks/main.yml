@@ -76,6 +76,7 @@
       - python3-dns
       - python3.12-dns
       - python3-libsemanage
+      - python3-policycoreutils
       - incron
       - openldap-clients
       - cockpit
