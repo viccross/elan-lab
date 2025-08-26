@@ -141,6 +141,7 @@
           register: elan_pubkey
     - name: Start InfluxDB
       ansible.builtin.systemd:
+      when: ansible_architecture == "s390x"
         name: pod-vmprf
         state: started
 
