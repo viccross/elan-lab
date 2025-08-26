@@ -159,7 +159,7 @@
             dest: ~/.ssh/id_ed25519
             owner: root
             group: root
-            mode: 0660
+            mode: 0600
         - name: Drop public key into ssh dir
           ansible.builtin.copy:
             content: "{{ hostvars['elan_1'].elan_pubkey['content'] | b64decode }}"
