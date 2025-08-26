@@ -40,7 +40,8 @@
     - configure-cockpit
     #  - configure-ignition
     - setup-grafana-log-viewer
-    - setup-data-pump
+    - role: setup-data-pump
+      when: ansible_architecture == "s390x"
     - setup-ocp-deployer
     - setup-icic-deployer
     - setup-finna-response
