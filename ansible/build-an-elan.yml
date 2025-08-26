@@ -55,6 +55,7 @@
     secret_src: '{{ "/opt/resources" if ansible_architecture == "x86_64" else "/home/support" }}'
 #    content_src: '{{ "/opt/resources" if ansible_architecture == "x86_64" else "/srv/nfs/openshift-content" }}'
     content_src: /opt/resources
+    local_user: '{{ "vagrant" if ansible_architecture == "x86_64" else "support" }}'
   tasks:
     - name: Patch z/VM LDAP host
       when: ansible_architecture == 's390x'
@@ -94,21 +95,21 @@
       ansible.builtin.copy:
         src: "{{ secret_src }}/.viccross-pull-secret.txt"
         dest: /var/www/html/.secret/viccross@au.ibm.com
-        owner: support
+        owner: "{{ local_user }}"
         group: root
         mode: 0664
     - name: Copy the RHOCP content module
       ansible.builtin.copy:
         src: "{{ content_src }}/rhocp-install-4.14.9.esi"
         dest: /opt/content/
-        owner: support
+        owner: "{{ local_user }}"
         group: root
         mode: 0664
     - name: Copy the ICIC content module
       ansible.builtin.copy:
         src: "{{ content_src }}/icic-1.2.1.0-fba.esi"
         dest: /opt/content/
-        owner: support
+        owner: "{{ local_user }}"
         group: root
         mode: 0664
     - name: Create the RHEL88 repo file
